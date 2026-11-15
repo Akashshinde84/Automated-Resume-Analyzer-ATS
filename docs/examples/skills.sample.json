@@ -1,0 +1,158 @@
+{
+  "text": "Skills: React.js, JS, ML, Go, R\nExperience\nBuilt backend services in Go and Python.\nProjects\nBuilt services with FastAPI and PostgreSQL.",
+  "skills": [
+    {
+      "name": "React",
+      "category": "frameworks",
+      "explicitly_listed": true,
+      "occurrences": [
+        {
+          "text": "React.js",
+          "start": 8,
+          "end": 16,
+          "alias": "React.js",
+          "section": "skills",
+          "source_type": "explicit",
+          "context_rule": null
+        }
+      ]
+    },
+    {
+      "name": "JavaScript",
+      "category": "programming_languages",
+      "explicitly_listed": true,
+      "occurrences": [
+        {
+          "text": "JS",
+          "start": 18,
+          "end": 20,
+          "alias": "JS",
+          "section": "skills",
+          "source_type": "explicit",
+          "context_rule": null
+        }
+      ]
+    },
+    {
+      "name": "Machine Learning",
+      "category": "machine_learning",
+      "explicitly_listed": true,
+      "occurrences": [
+        {
+          "text": "ML",
+          "start": 22,
+          "end": 24,
+          "alias": "ML",
+          "section": "skills",
+          "source_type": "explicit",
+          "context_rule": "machine_learning"
+        }
+      ]
+    },
+    {
+      "name": "Go",
+      "category": "programming_languages",
+      "explicitly_listed": true,
+      "occurrences": [
+        {
+          "text": "Go",
+          "start": 26,
+          "end": 28,
+          "alias": "Go",
+          "section": "skills",
+          "source_type": "explicit",
+          "context_rule": "programming_language"
+        },
+        {
+          "text": "Go",
+          "start": 69,
+          "end": 71,
+          "alias": "Go",
+          "section": "experience",
+          "source_type": "experience",
+          "context_rule": "programming_language"
+        }
+      ]
+    },
+    {
+      "name": "R",
+      "category": "programming_languages",
+      "explicitly_listed": true,
+      "occurrences": [
+        {
+          "text": "R",
+          "start": 30,
+          "end": 31,
+          "alias": "R",
+          "section": "skills",
+          "source_type": "explicit",
+          "context_rule": "programming_language"
+        }
+      ]
+    },
+    {
+      "name": "Python",
+      "category": "programming_languages",
+      "explicitly_listed": false,
+      "occurrences": [
+        {
+          "text": "Python",
+          "start": 76,
+          "end": 82,
+          "alias": "Python",
+          "section": "experience",
+          "source_type": "experience",
+          "context_rule": null
+        }
+      ]
+    },
+    {
+      "name": "FastAPI",
+      "category": "frameworks",
+      "explicitly_listed": false,
+      "occurrences": [
+        {
+          "text": "FastAPI",
+          "start": 113,
+          "end": 120,
+          "alias": "FastAPI",
+          "section": "projects",
+          "source_type": "project",
+          "context_rule": null
+        }
+      ]
+    },
+    {
+      "name": "PostgreSQL",
+      "category": "databases",
+      "explicitly_listed": false,
+      "occurrences": [
+        {
+          "text": "PostgreSQL",
+          "start": 125,
+          "end": 135,
+          "alias": "PostgreSQL",
+          "section": "projects",
+          "source_type": "project",
+          "context_rule": null
+        }
+      ]
+    }
+  ],
+  "skill_ontology_version": "1.0.0",
+  "sections": {
+    "skills": "React.js, JS, ML, Go, R",
+    "experience": "Built backend services in Go and Python.",
+    "projects": "Built services with FastAPI and PostgreSQL."
+  },
+  "warnings": [
+    "DOCX text boxes, drawings, and tracked revisions may not be extracted; page count is unavailable."
+  ],
+  "metadata": {
+    "filename": "phase4-synthetic.docx",
+    "file_type": "docx",
+    "size_bytes": 36678,
+    "characters": 136,
+    "page_count": null
+  }
+}

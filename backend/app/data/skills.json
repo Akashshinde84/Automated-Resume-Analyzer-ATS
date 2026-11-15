@@ -1,0 +1,860 @@
+{
+  "version": "1.0.0",
+  "skills": [
+    {
+      "name": "Python",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Java",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "JavaScript",
+      "category": "programming_languages",
+      "aliases": [
+        "JS",
+        "ECMAScript"
+      ]
+    },
+    {
+      "name": "TypeScript",
+      "category": "programming_languages",
+      "aliases": [
+        "TS"
+      ]
+    },
+    {
+      "name": "C",
+      "category": "programming_languages",
+      "aliases": [
+        "C language"
+      ],
+      "ambiguous_aliases": [
+        "C"
+      ],
+      "context_rule": "programming_language"
+    },
+    {
+      "name": "C++",
+      "category": "programming_languages",
+      "aliases": [
+        "CPP"
+      ]
+    },
+    {
+      "name": "C#",
+      "category": "programming_languages",
+      "aliases": [
+        "C Sharp",
+        "CSharp"
+      ]
+    },
+    {
+      "name": "Go",
+      "category": "programming_languages",
+      "aliases": [
+        "Golang",
+        "Go language"
+      ],
+      "ambiguous_aliases": [
+        "Go"
+      ],
+      "context_rule": "programming_language"
+    },
+    {
+      "name": "R",
+      "category": "programming_languages",
+      "aliases": [
+        "R language",
+        "R programming"
+      ],
+      "ambiguous_aliases": [
+        "R"
+      ],
+      "context_rule": "programming_language"
+    },
+    {
+      "name": "Rust",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Ruby",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "PHP",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Swift",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Kotlin",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Scala",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Dart",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Bash",
+      "category": "programming_languages",
+      "aliases": [
+        "Bash scripting"
+      ]
+    },
+    {
+      "name": "PowerShell",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "SQL",
+      "category": "programming_languages",
+      "aliases": [
+        "Structured Query Language"
+      ]
+    },
+    {
+      "name": "MATLAB",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Julia",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Perl",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "Objective-C",
+      "category": "programming_languages",
+      "aliases": []
+    },
+    {
+      "name": "React",
+      "category": "frameworks",
+      "aliases": [
+        "React.js",
+        "ReactJS"
+      ],
+      "ambiguous_aliases": [
+        "React"
+      ],
+      "context_rule": "technical_context"
+    },
+    {
+      "name": "React Native",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "Vue.js",
+      "category": "frameworks",
+      "aliases": [
+        "Vue",
+        "VueJS"
+      ]
+    },
+    {
+      "name": "Angular",
+      "category": "frameworks",
+      "aliases": [
+        "AngularJS"
+      ]
+    },
+    {
+      "name": "Next.js",
+      "category": "frameworks",
+      "aliases": [
+        "NextJS"
+      ]
+    },
+    {
+      "name": "Node.js",
+      "category": "frameworks",
+      "aliases": [
+        "NodeJS"
+      ]
+    },
+    {
+      "name": "Express.js",
+      "category": "frameworks",
+      "aliases": [
+        "ExpressJS"
+      ]
+    },
+    {
+      "name": "Django",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "Flask",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "FastAPI",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "Spring Boot",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": ".NET",
+      "category": "frameworks",
+      "aliases": [
+        "DotNET",
+        "ASP.NET"
+      ]
+    },
+    {
+      "name": "Tailwind CSS",
+      "category": "frameworks",
+      "aliases": [
+        "TailwindCSS",
+        "Tailwind"
+      ]
+    },
+    {
+      "name": "Bootstrap",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "Svelte",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "Laravel",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "Flutter",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "Ruby on Rails",
+      "category": "frameworks",
+      "aliases": [
+        "Rails"
+      ]
+    },
+    {
+      "name": "jQuery",
+      "category": "frameworks",
+      "aliases": []
+    },
+    {
+      "name": "PostgreSQL",
+      "category": "databases",
+      "aliases": [
+        "Postgres"
+      ]
+    },
+    {
+      "name": "MySQL",
+      "category": "databases",
+      "aliases": []
+    },
+    {
+      "name": "SQLite",
+      "category": "databases",
+      "aliases": []
+    },
+    {
+      "name": "Microsoft SQL Server",
+      "category": "databases",
+      "aliases": [
+        "SQL Server",
+        "MSSQL"
+      ]
+    },
+    {
+      "name": "MongoDB",
+      "category": "databases",
+      "aliases": [
+        "Mongo DB"
+      ]
+    },
+    {
+      "name": "Redis",
+      "category": "databases",
+      "aliases": []
+    },
+    {
+      "name": "Oracle Database",
+      "category": "databases",
+      "aliases": [
+        "Oracle DB"
+      ]
+    },
+    {
+      "name": "Elasticsearch",
+      "category": "databases",
+      "aliases": []
+    },
+    {
+      "name": "DynamoDB",
+      "category": "databases",
+      "aliases": [
+        "Amazon DynamoDB"
+      ]
+    },
+    {
+      "name": "Cassandra",
+      "category": "databases",
+      "aliases": [
+        "Apache Cassandra"
+      ]
+    },
+    {
+      "name": "MariaDB",
+      "category": "databases",
+      "aliases": []
+    },
+    {
+      "name": "Neo4j",
+      "category": "databases",
+      "aliases": []
+    },
+    {
+      "name": "Amazon Web Services",
+      "category": "cloud_tools",
+      "aliases": [
+        "AWS"
+      ]
+    },
+    {
+      "name": "Microsoft Azure",
+      "category": "cloud_tools",
+      "aliases": [
+        "Azure"
+      ]
+    },
+    {
+      "name": "Google Cloud Platform",
+      "category": "cloud_tools",
+      "aliases": [
+        "GCP",
+        "Google Cloud"
+      ]
+    },
+    {
+      "name": "Amazon EC2",
+      "category": "cloud_tools",
+      "aliases": [
+        "EC2"
+      ]
+    },
+    {
+      "name": "Amazon S3",
+      "category": "cloud_tools",
+      "aliases": [
+        "AWS S3"
+      ]
+    },
+    {
+      "name": "AWS Lambda",
+      "category": "cloud_tools",
+      "aliases": [
+        "Amazon Lambda"
+      ]
+    },
+    {
+      "name": "Docker",
+      "category": "cloud_tools",
+      "aliases": []
+    },
+    {
+      "name": "Kubernetes",
+      "category": "cloud_tools",
+      "aliases": [
+        "K8s"
+      ]
+    },
+    {
+      "name": "Terraform",
+      "category": "cloud_tools",
+      "aliases": []
+    },
+    {
+      "name": "Ansible",
+      "category": "cloud_tools",
+      "aliases": []
+    },
+    {
+      "name": "Jenkins",
+      "category": "cloud_tools",
+      "aliases": []
+    },
+    {
+      "name": "GitHub Actions",
+      "category": "cloud_tools",
+      "aliases": []
+    },
+    {
+      "name": "Vercel",
+      "category": "cloud_tools",
+      "aliases": []
+    },
+    {
+      "name": "Render",
+      "category": "cloud_tools",
+      "aliases": [
+        "Render.com"
+      ],
+      "ambiguous_aliases": [
+        "Render"
+      ],
+      "context_rule": "technical_context"
+    },
+    {
+      "name": "Firebase",
+      "category": "cloud_tools",
+      "aliases": []
+    },
+    {
+      "name": "CloudFormation",
+      "category": "cloud_tools",
+      "aliases": [
+        "AWS CloudFormation"
+      ]
+    },
+    {
+      "name": "pandas",
+      "category": "data_science",
+      "aliases": []
+    },
+    {
+      "name": "NumPy",
+      "category": "data_science",
+      "aliases": []
+    },
+    {
+      "name": "SciPy",
+      "category": "data_science",
+      "aliases": []
+    },
+    {
+      "name": "Matplotlib",
+      "category": "data_science",
+      "aliases": []
+    },
+    {
+      "name": "Seaborn",
+      "category": "data_science",
+      "aliases": []
+    },
+    {
+      "name": "Jupyter",
+      "category": "data_science",
+      "aliases": [
+        "Jupyter Notebook"
+      ]
+    },
+    {
+      "name": "Apache Spark",
+      "category": "data_science",
+      "aliases": [
+        "PySpark",
+        "Spark"
+      ]
+    },
+    {
+      "name": "Apache Hadoop",
+      "category": "data_science",
+      "aliases": [
+        "Hadoop"
+      ]
+    },
+    {
+      "name": "Data Analysis",
+      "category": "data_science",
+      "aliases": [
+        "Data Analytics"
+      ]
+    },
+    {
+      "name": "Data Visualization",
+      "category": "data_science",
+      "aliases": [
+        "Data Visualisation"
+      ]
+    },
+    {
+      "name": "Statistical Analysis",
+      "category": "data_science",
+      "aliases": []
+    },
+    {
+      "name": "Feature Engineering",
+      "category": "data_science",
+      "aliases": []
+    },
+    {
+      "name": "ETL",
+      "category": "data_science",
+      "aliases": [
+        "Extract Transform Load"
+      ]
+    },
+    {
+      "name": "Power BI",
+      "category": "data_science",
+      "aliases": [
+        "PowerBI"
+      ]
+    },
+    {
+      "name": "Tableau",
+      "category": "data_science",
+      "aliases": []
+    },
+    {
+      "name": "Apache Airflow",
+      "category": "data_science",
+      "aliases": [
+        "Airflow"
+      ]
+    },
+    {
+      "name": "Machine Learning",
+      "category": "machine_learning",
+      "aliases": [
+        "ML"
+      ],
+      "ambiguous_aliases": [
+        "ML"
+      ],
+      "context_rule": "machine_learning"
+    },
+    {
+      "name": "Deep Learning",
+      "category": "machine_learning",
+      "aliases": []
+    },
+    {
+      "name": "Natural Language Processing",
+      "category": "machine_learning",
+      "aliases": [
+        "NLP"
+      ]
+    },
+    {
+      "name": "Computer Vision",
+      "category": "machine_learning",
+      "aliases": []
+    },
+    {
+      "name": "scikit-learn",
+      "category": "machine_learning",
+      "aliases": [
+        "sklearn",
+        "scikit learn"
+      ]
+    },
+    {
+      "name": "TensorFlow",
+      "category": "machine_learning",
+      "aliases": [
+        "Tensor Flow"
+      ]
+    },
+    {
+      "name": "PyTorch",
+      "category": "machine_learning",
+      "aliases": [
+        "Py Torch"
+      ]
+    },
+    {
+      "name": "Keras",
+      "category": "machine_learning",
+      "aliases": []
+    },
+    {
+      "name": "spaCy",
+      "category": "machine_learning",
+      "aliases": []
+    },
+    {
+      "name": "XGBoost",
+      "category": "machine_learning",
+      "aliases": []
+    },
+    {
+      "name": "LightGBM",
+      "category": "machine_learning",
+      "aliases": []
+    },
+    {
+      "name": "Hugging Face",
+      "category": "machine_learning",
+      "aliases": [
+        "HuggingFace"
+      ]
+    },
+    {
+      "name": "Transformers",
+      "category": "machine_learning",
+      "aliases": [
+        "Transformer models"
+      ]
+    },
+    {
+      "name": "Large Language Models",
+      "category": "machine_learning",
+      "aliases": [
+        "LLM",
+        "LLMs"
+      ]
+    },
+    {
+      "name": "MLOps",
+      "category": "machine_learning",
+      "aliases": []
+    },
+    {
+      "name": "Reinforcement Learning",
+      "category": "machine_learning",
+      "aliases": []
+    },
+    {
+      "name": "Recommendation Systems",
+      "category": "machine_learning",
+      "aliases": [
+        "Recommender Systems"
+      ]
+    },
+    {
+      "name": "Communication",
+      "category": "soft_skills",
+      "aliases": [
+        "Communication Skills"
+      ]
+    },
+    {
+      "name": "Teamwork",
+      "category": "soft_skills",
+      "aliases": [
+        "Team Work",
+        "Team Collaboration"
+      ]
+    },
+    {
+      "name": "Leadership",
+      "category": "soft_skills",
+      "aliases": []
+    },
+    {
+      "name": "Problem Solving",
+      "category": "soft_skills",
+      "aliases": [
+        "Problem-Solving"
+      ]
+    },
+    {
+      "name": "Critical Thinking",
+      "category": "soft_skills",
+      "aliases": []
+    },
+    {
+      "name": "Time Management",
+      "category": "soft_skills",
+      "aliases": []
+    },
+    {
+      "name": "Adaptability",
+      "category": "soft_skills",
+      "aliases": []
+    },
+    {
+      "name": "Collaboration",
+      "category": "soft_skills",
+      "aliases": []
+    },
+    {
+      "name": "Conflict Resolution",
+      "category": "soft_skills",
+      "aliases": []
+    },
+    {
+      "name": "Presentation Skills",
+      "category": "soft_skills",
+      "aliases": []
+    },
+    {
+      "name": "Stakeholder Management",
+      "category": "soft_skills",
+      "aliases": []
+    },
+    {
+      "name": "Mentoring",
+      "category": "soft_skills",
+      "aliases": [
+        "Mentorship"
+      ]
+    },
+    {
+      "name": "Git",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Linux",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "HTML",
+      "category": "technical",
+      "aliases": [
+        "HTML5"
+      ]
+    },
+    {
+      "name": "CSS",
+      "category": "technical",
+      "aliases": [
+        "CSS3"
+      ]
+    },
+    {
+      "name": "REST API",
+      "category": "technical",
+      "aliases": [
+        "REST APIs",
+        "RESTful API",
+        "RESTful APIs"
+      ]
+    },
+    {
+      "name": "GraphQL",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "WebSocket",
+      "category": "technical",
+      "aliases": [
+        "WebSockets"
+      ]
+    },
+    {
+      "name": "CI/CD",
+      "category": "technical",
+      "aliases": [
+        "CI CD",
+        "Continuous Integration",
+        "Continuous Delivery"
+      ]
+    },
+    {
+      "name": "Agile",
+      "category": "technical",
+      "aliases": [
+        "Agile Methodology"
+      ]
+    },
+    {
+      "name": "Scrum",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Unit Testing",
+      "category": "technical",
+      "aliases": [
+        "Unit Tests"
+      ]
+    },
+    {
+      "name": "pytest",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Jest",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Playwright",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Selenium",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Postman",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Figma",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Microservices",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Apache Kafka",
+      "category": "technical",
+      "aliases": [
+        "Kafka"
+      ]
+    },
+    {
+      "name": "RabbitMQ",
+      "category": "technical",
+      "aliases": []
+    },
+    {
+      "name": "Cybersecurity",
+      "category": "technical",
+      "aliases": [
+        "Cyber Security"
+      ]
+    },
+    {
+      "name": "OAuth",
+      "category": "technical",
+      "aliases": [
+        "OAuth2"
+      ]
+    }
+  ]
+}

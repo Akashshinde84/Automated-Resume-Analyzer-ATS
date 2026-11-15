@@ -1,0 +1,220 @@
+{
+  "status": "computed",
+  "scores": {
+    "skill_overlap": 57.14,
+    "text_similarity": 74.74,
+    "overall": 62.42
+  },
+  "weights": {
+    "skills": 0.7,
+    "text": 0.3,
+    "required_importance": 2.0,
+    "preferred_importance": 1.0,
+    "unspecified_importance": 1.0
+  },
+  "effective_weights": {
+    "skills": 0.7,
+    "text": 0.3
+  },
+  "formula": "S=100*sum(importance_i*matched_i)/sum(importance_i); T=100*cosine(binary_TFIDF_resume,binary_TFIDF_job); overall=w_skills*S+w_text*T",
+  "score_meaning": "Project-defined compatibility estimate; not an ATS score, hiring probability, or hiring/rejection recommendation.",
+  "ontology_version": "1.0.0",
+  "required_skills": [
+    {
+      "name": "Python",
+      "category": "programming_languages",
+      "importance": "required",
+      "job_evidence": [
+        {
+          "text": "Python",
+          "start": 10,
+          "end": 16,
+          "section": "required",
+          "context": "Python, SQL, Docker"
+        },
+        {
+          "text": "Python",
+          "start": 87,
+          "end": 93,
+          "section": "unspecified",
+          "context": "Build backend APIs using Python."
+        }
+      ]
+    },
+    {
+      "name": "SQL",
+      "category": "programming_languages",
+      "importance": "required",
+      "job_evidence": [
+        {
+          "text": "SQL",
+          "start": 18,
+          "end": 21,
+          "section": "required",
+          "context": "Python, SQL, Docker"
+        }
+      ]
+    },
+    {
+      "name": "Docker",
+      "category": "cloud_tools",
+      "importance": "required",
+      "job_evidence": [
+        {
+          "text": "Docker",
+          "start": 23,
+          "end": 29,
+          "section": "required",
+          "context": "Python, SQL, Docker"
+        }
+      ]
+    }
+  ],
+  "preferred_skills": [
+    {
+      "name": "Amazon Web Services",
+      "category": "cloud_tools",
+      "importance": "preferred",
+      "job_evidence": [
+        {
+          "text": "AWS",
+          "start": 41,
+          "end": 44,
+          "section": "preferred",
+          "context": "AWS"
+        }
+      ],
+      "matched": false,
+      "resume_evidence": []
+    }
+  ],
+  "unspecified_skills": [],
+  "matched_skills": [
+    {
+      "name": "Python",
+      "category": "programming_languages",
+      "importance": "required",
+      "job_evidence": [
+        {
+          "text": "Python",
+          "start": 10,
+          "end": 16,
+          "section": "required",
+          "context": "Python, SQL, Docker"
+        },
+        {
+          "text": "Python",
+          "start": 87,
+          "end": 93,
+          "section": "unspecified",
+          "context": "Build backend APIs using Python."
+        }
+      ],
+      "matched": true,
+      "resume_evidence": [
+        {
+          "text": "Python",
+          "start": 8,
+          "end": 14,
+          "section": "skills",
+          "context": " Python, SQL"
+        },
+        {
+          "text": "Python",
+          "start": 56,
+          "end": 62,
+          "section": "experience",
+          "context": "Built backend APIs using Python."
+        }
+      ]
+    },
+    {
+      "name": "SQL",
+      "category": "programming_languages",
+      "importance": "required",
+      "job_evidence": [
+        {
+          "text": "SQL",
+          "start": 18,
+          "end": 21,
+          "section": "required",
+          "context": "Python, SQL, Docker"
+        }
+      ],
+      "matched": true,
+      "resume_evidence": [
+        {
+          "text": "SQL",
+          "start": 16,
+          "end": 19,
+          "section": "skills",
+          "context": " Python, SQL"
+        }
+      ]
+    }
+  ],
+  "missing_required_skills": [
+    {
+      "name": "Docker",
+      "category": "cloud_tools",
+      "importance": "required",
+      "job_evidence": [
+        {
+          "text": "Docker",
+          "start": 23,
+          "end": 29,
+          "section": "required",
+          "context": "Python, SQL, Docker"
+        }
+      ]
+    }
+  ],
+  "suggestions": [
+    {
+      "code": "review_requirement_gap",
+      "skill": "Docker",
+      "message": "No qualifying resume evidence for Docker was found. Review this job criterion against your actual background; do not list this skill without substantiating experience.",
+      "resume_evidence": []
+    },
+    {
+      "code": "review_preferred_gap",
+      "skill": "Amazon Web Services",
+      "message": "No qualifying resume evidence for Amazon Web Services was found. Review this job criterion against your actual background; do not list this skill without substantiating experience.",
+      "resume_evidence": []
+    }
+  ],
+  "shared_text_features": [
+    {
+      "feature": "Python",
+      "kind": "skill",
+      "cosine_contribution": 0.14948147080120927
+    },
+    {
+      "feature": "SQL",
+      "kind": "skill",
+      "cosine_contribution": 0.14948147080120927
+    },
+    {
+      "feature": "api",
+      "kind": "task",
+      "cosine_contribution": 0.14948147080120927
+    },
+    {
+      "feature": "backend",
+      "kind": "task",
+      "cosine_contribution": 0.14948147080120927
+    },
+    {
+      "feature": "build",
+      "kind": "task",
+      "cosine_contribution": 0.14948147080120927
+    }
+  ],
+  "warnings": [
+    "A skill has conflicting importance labels; required takes priority over preferred, then unspecified.",
+    "Only ontology skills and allowlisted task terms in recognized professional sections enter scoring; contact/preamble and education institutions, names, dates, and personal attributes are not scoring features.",
+    "TF-IDF is lexical similarity, not semantic understanding. Ontology coverage, section boundaries, negation and requirement rules are incomplete; review evidence manually.",
+    "Unlabeled requirements stay unspecified. No automatic hiring/rejection decision or threshold is provided."
+  ],
+  "method": "Pair-local binary TF-IDF and cosine over canonical skill and allowlisted task tokens; no embeddings or custom-trained predictor."
+}

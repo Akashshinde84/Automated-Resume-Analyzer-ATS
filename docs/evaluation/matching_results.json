@@ -1,0 +1,231 @@
+{
+  "annotation_checks_passed": 10,
+  "cases": 10,
+  "results": [
+    {
+      "id": "identical",
+      "annotations_pass": true,
+      "actual": {
+        "required": [
+          "Python",
+          "SQL"
+        ],
+        "preferred": [],
+        "matched": [
+          "Python",
+          "SQL"
+        ],
+        "missing_required": [],
+        "skill_overlap": 100.0,
+        "status": "computed"
+      },
+      "scores": {
+        "skill_overlap": 100.0,
+        "text_similarity": 100.0,
+        "overall": 100.0
+      }
+    },
+    {
+      "id": "partial",
+      "annotations_pass": true,
+      "actual": {
+        "required": [
+          "Python",
+          "SQL",
+          "Docker"
+        ],
+        "preferred": [
+          "Amazon Web Services"
+        ],
+        "matched": [
+          "Python",
+          "SQL"
+        ],
+        "missing_required": [
+          "Docker"
+        ],
+        "skill_overlap": 57.14,
+        "status": "computed"
+      },
+      "scores": {
+        "skill_overlap": 57.14,
+        "text_similarity": 57.97,
+        "overall": 57.39
+      }
+    },
+    {
+      "id": "unrelated",
+      "annotations_pass": true,
+      "actual": {
+        "required": [
+          "Python",
+          "TensorFlow"
+        ],
+        "preferred": [],
+        "matched": [],
+        "missing_required": [
+          "Python",
+          "TensorFlow"
+        ],
+        "skill_overlap": 0.0,
+        "status": "computed"
+      },
+      "scores": {
+        "skill_overlap": 0.0,
+        "text_similarity": 0.0,
+        "overall": 0.0
+      }
+    },
+    {
+      "id": "aliases",
+      "annotations_pass": true,
+      "actual": {
+        "required": [
+          "JavaScript",
+          "React"
+        ],
+        "preferred": [],
+        "matched": [
+          "JavaScript",
+          "React"
+        ],
+        "missing_required": [],
+        "skill_overlap": 100.0,
+        "status": "computed"
+      },
+      "scores": {
+        "skill_overlap": 100.0,
+        "text_similarity": 100.0,
+        "overall": 100.0
+      }
+    },
+    {
+      "id": "negated",
+      "annotations_pass": true,
+      "actual": {
+        "required": [
+          "Python",
+          "SQL"
+        ],
+        "preferred": [],
+        "matched": [
+          "Python"
+        ],
+        "missing_required": [
+          "SQL"
+        ],
+        "skill_overlap": 50.0,
+        "status": "computed"
+      },
+      "scores": {
+        "skill_overlap": 50.0,
+        "text_similarity": 57.97,
+        "overall": 52.39
+      }
+    },
+    {
+      "id": "preferred_only",
+      "annotations_pass": true,
+      "actual": {
+        "required": [],
+        "preferred": [
+          "Docker",
+          "Kubernetes"
+        ],
+        "matched": [
+          "Docker"
+        ],
+        "missing_required": [],
+        "skill_overlap": 50.0,
+        "status": "computed"
+      },
+      "scores": {
+        "skill_overlap": 50.0,
+        "text_similarity": 57.97,
+        "overall": 52.39
+      }
+    },
+    {
+      "id": "empty_resume",
+      "annotations_pass": true,
+      "actual": {
+        "required": [
+          "Python"
+        ],
+        "preferred": [],
+        "matched": [],
+        "missing_required": [
+          "Python"
+        ],
+        "skill_overlap": null,
+        "status": "insufficient_input"
+      },
+      "scores": {
+        "skill_overlap": null,
+        "text_similarity": null,
+        "overall": null
+      }
+    },
+    {
+      "id": "out_of_ontology",
+      "annotations_pass": true,
+      "actual": {
+        "required": [],
+        "preferred": [],
+        "matched": [],
+        "missing_required": [],
+        "skill_overlap": null,
+        "status": "no_supported_job_skills"
+      },
+      "scores": {
+        "skill_overlap": null,
+        "text_similarity": null,
+        "overall": null
+      }
+    },
+    {
+      "id": "instruction_attack",
+      "annotations_pass": true,
+      "actual": {
+        "required": [
+          "Docker"
+        ],
+        "preferred": [],
+        "matched": [],
+        "missing_required": [
+          "Docker"
+        ],
+        "skill_overlap": 0.0,
+        "status": "computed"
+      },
+      "scores": {
+        "skill_overlap": 0.0,
+        "text_similarity": 0.0,
+        "overall": 0.0
+      }
+    },
+    {
+      "id": "personal_counterfactual",
+      "annotations_pass": true,
+      "actual": {
+        "required": [
+          "Python",
+          "SQL"
+        ],
+        "preferred": [],
+        "matched": [
+          "Python",
+          "SQL"
+        ],
+        "missing_required": [],
+        "skill_overlap": 100.0,
+        "status": "computed"
+      },
+      "scores": {
+        "skill_overlap": 100.0,
+        "text_similarity": 100.0,
+        "overall": 100.0
+      }
+    }
+  ]
+}

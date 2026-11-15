@@ -1,0 +1,85 @@
+{
+  "label_source": "Developer-authored ordinal diagnostic labels, not independent human relevance judgments or hiring outcomes.",
+  "queries": 5,
+  "pairwise_order_checks": 15,
+  "passed_pairs": 15,
+  "passed_queries": 5,
+  "results": [
+    {
+      "id": "backend",
+      "scores": {
+        "full": 100.0,
+        "partial": 36.82,
+        "unrelated": 0.0
+      },
+      "order": [
+        "full",
+        "partial",
+        "unrelated"
+      ],
+      "passed_pairs": 3,
+      "passes": true
+    },
+    {
+      "id": "frontend",
+      "scores": {
+        "full": 100.0,
+        "partial": 36.82,
+        "unrelated": 0.0
+      },
+      "order": [
+        "full",
+        "partial",
+        "unrelated"
+      ],
+      "passed_pairs": 3,
+      "passes": true
+    },
+    {
+      "id": "ml",
+      "scores": {
+        "full": 100.0,
+        "partial": 36.82,
+        "unrelated": 0.0
+      },
+      "order": [
+        "full",
+        "partial",
+        "unrelated"
+      ],
+      "passed_pairs": 3,
+      "passes": true
+    },
+    {
+      "id": "cloud",
+      "scores": {
+        "full": 100.0,
+        "partial": 36.82,
+        "unrelated": 0.0
+      },
+      "order": [
+        "full",
+        "partial",
+        "unrelated"
+      ],
+      "passed_pairs": 3,
+      "passes": true
+    },
+    {
+      "id": "databases",
+      "scores": {
+        "full": 100.0,
+        "partial": 36.82,
+        "unrelated": 0.0
+      },
+      "order": [
+        "full",
+        "partial",
+        "unrelated"
+      ],
+      "passed_pairs": 3,
+      "passes": true
+    }
+  ],
+  "limitations": "Labels concern supported skill coverage only. They do not evaluate seniority, context, job performance, fairness, probability, or subjective hiring relevance. Human adjudication is pending."
+}

@@ -1,0 +1,12 @@
+{
+  "label_source": "Developer-authored ordinal diagnostic labels, not independent human relevance judgments or hiring outcomes.",
+  "queries": [
+    {"id":"backend","job":"Required: Python, SQL, FastAPI","full":"Skills: Python, SQL, FastAPI","partial":"Skills: Python","unrelated":"Skills: Java, Spring Boot"},
+    {"id":"frontend","job":"Required: React, TypeScript, CSS","full":"Skills: React, TypeScript, CSS","partial":"Skills: React","unrelated":"Skills: Java, Spring Boot"},
+    {"id":"ml","job":"Required: Python, TensorFlow, Machine Learning","full":"Skills: Python, TensorFlow, Machine Learning","partial":"Skills: Python","unrelated":"Skills: Java, Spring Boot"},
+    {"id":"cloud","job":"Required: Docker, Kubernetes, AWS","full":"Skills: Docker, Kubernetes, AWS","partial":"Skills: Docker","unrelated":"Skills: Java, Spring Boot"},
+    {"id":"databases","job":"Required: SQL, PostgreSQL, Redis","full":"Skills: SQL, PostgreSQL, Redis","partial":"Skills: SQL","unrelated":"Skills: Java, Spring Boot"}
+  ],
+  "expected_order": ["full", "partial", "unrelated"],
+  "limitations": "Labels concern supported skill coverage only. They do not evaluate seniority, context, job performance, fairness, probability, or subjective hiring relevance. Human adjudication is pending."
+}

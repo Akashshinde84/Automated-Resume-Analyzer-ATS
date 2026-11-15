@@ -1,0 +1,41 @@
+# First deployment: authenticated, single-owner, stateless. No database provisioned.
+services:
+  - type: web
+    name: resume-analyzer-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: standard
+    autoDeployTrigger: off
+    healthCheckPath: /health
+    envVars:
+      - key: DEPLOYMENT_ENVIRONMENT
+        value: production
+      - key: APP_MODE
+        value: single_user
+      - key: SINGLE_USER_API_KEY
+        generateValue: true
+      - key: REPORT_SIGNING_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: STORAGE_ENABLED
+        value: "false"
+      - key: REQUIRE_NER_MODEL
+        value: "true"
+      - key: SPACY_MODEL
+        value: en_core_web_sm
+      - key: ISOLATE_PARSING
+        value: "true"
+      - key: PARSER_TIMEOUT_SECONDS
+        value: "25"
+      - key: PARSER_MEMORY_MB
+        value: "384"
+      - key: MAX_CONCURRENT_PROCESSING
+        value: "1"
+      - key: MAX_UPLOAD_BYTES
+        value: "10485760"
+      - key: MAX_PDF_PAGES
+        value: "50"

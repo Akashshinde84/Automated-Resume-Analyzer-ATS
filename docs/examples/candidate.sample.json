@@ -1,0 +1,253 @@
+{
+  "candidate": {
+    "name": "Jordan Example",
+    "emails": [
+      "jordan@example.test"
+    ],
+    "phones": [
+      {
+        "raw": "+44 20 7946 0018",
+        "e164": "+442079460018",
+        "extension": null,
+        "region": "GB",
+        "status": "valid"
+      }
+    ],
+    "linkedin_urls": [
+      "https://linkedin.com/in/synthetic-candidate-example"
+    ],
+    "github_urls": [
+      "https://github.com/synthetic-candidate-example"
+    ],
+    "portfolio_urls": [
+      "https://jordan.example.test"
+    ],
+    "education": [
+      {
+        "raw_text": "Example University | Bachelor of Science in Computer Science | 2016 - 2020",
+        "provenance": [
+          {
+            "field": "institution",
+            "method": "heuristic",
+            "rule": "university_vocabulary_or_label",
+            "source_text": "Example University",
+            "confidence": "medium"
+          },
+          {
+            "field": "degree",
+            "method": "heuristic",
+            "rule": "explicit_degree_vocabulary",
+            "source_text": "Bachelor of Science",
+            "confidence": "high"
+          },
+          {
+            "field": "field",
+            "method": "heuristic",
+            "rule": "degree_field_connector",
+            "source_text": "in Computer Science",
+            "confidence": "medium"
+          },
+          {
+            "field": "dates",
+            "method": "regex",
+            "rule": "explicit_date_range",
+            "source_text": "2016 - 2020",
+            "confidence": "high"
+          }
+        ],
+        "warnings": [],
+        "institution": "Example University",
+        "degree": "Bachelor of Science",
+        "field": "Computer Science",
+        "start_date": "2016",
+        "end_date": "2020"
+      }
+    ],
+    "work_experience": [
+      {
+        "raw_text": "Software Engineer | Example Labs | Jan 2021 - Present\n- Built internal services using synthetic documents.",
+        "provenance": [
+          {
+            "field": "job_title",
+            "method": "heuristic",
+            "rule": "role_vocabulary_or_label",
+            "source_text": "Software Engineer | Example Labs | Jan 2021 - Present",
+            "confidence": "medium"
+          },
+          {
+            "field": "company",
+            "method": "heuristic",
+            "rule": "company_suffix",
+            "source_text": "Example Labs",
+            "confidence": "medium"
+          },
+          {
+            "field": "dates",
+            "method": "regex",
+            "rule": "explicit_date_range",
+            "source_text": "Jan 2021 - Present",
+            "confidence": "high"
+          }
+        ],
+        "warnings": [],
+        "company": "Example Labs",
+        "job_title": "Software Engineer",
+        "start_date": "2021-01",
+        "end_date": "present",
+        "description": "- Built internal services using synthetic documents."
+      }
+    ],
+    "projects": [
+      {
+        "raw_text": "Project: Example Analyzer\n- Built a synthetic document tool.",
+        "provenance": [
+          {
+            "field": "name",
+            "method": "heuristic",
+            "rule": "project_section_header",
+            "source_text": "Project: Example Analyzer",
+            "confidence": "low"
+          }
+        ],
+        "warnings": [],
+        "name": "Example Analyzer",
+        "description": "- Built a synthetic document tool.",
+        "urls": []
+      }
+    ],
+    "certifications": [
+      {
+        "raw_text": "Certificate: Example Cloud Certificate | Issuer: Example Institute | 2023",
+        "provenance": [
+          {
+            "field": "name",
+            "method": "heuristic",
+            "rule": "certification_section_header",
+            "source_text": "Certificate: Example Cloud Certificate | Issuer: Example Institute | 2023",
+            "confidence": "low"
+          },
+          {
+            "field": "issuer",
+            "method": "heuristic",
+            "rule": "explicit_issuer_label",
+            "source_text": "Issuer: Example Institute",
+            "confidence": "high"
+          },
+          {
+            "field": "date",
+            "method": "regex",
+            "rule": "single_certification_date",
+            "source_text": "2023",
+            "confidence": "medium"
+          }
+        ],
+        "warnings": [],
+        "name": "Example Cloud Certificate",
+        "issuer": "Example Institute",
+        "date": "2023",
+        "credential_id": null
+      },
+      {
+        "raw_text": "Certificate: Example Workshop",
+        "provenance": [
+          {
+            "field": "name",
+            "method": "heuristic",
+            "rule": "certification_section_header",
+            "source_text": "Certificate: Example Workshop",
+            "confidence": "low"
+          }
+        ],
+        "warnings": [],
+        "name": "Example Workshop",
+        "issuer": null,
+        "date": null,
+        "credential_id": null
+      }
+    ],
+    "provenance": [
+      {
+        "field": "emails",
+        "method": "regex",
+        "rule": "email_syntax_not_delivery_verified",
+        "source_text": "jordan@example.test",
+        "confidence": "high"
+      },
+      {
+        "field": "phones",
+        "method": "phone_library",
+        "rule": "libphonenumber_validation",
+        "source_text": "+44 20 7946 0018",
+        "confidence": "high"
+      },
+      {
+        "field": "linkedin_urls",
+        "method": "regex",
+        "rule": "contact_url_host_or_explicit_label",
+        "source_text": "https://linkedin.com/in/synthetic-candidate-example",
+        "confidence": "medium"
+      },
+      {
+        "field": "github_urls",
+        "method": "regex",
+        "rule": "contact_url_host_or_explicit_label",
+        "source_text": "https://github.com/synthetic-candidate-example",
+        "confidence": "medium"
+      },
+      {
+        "field": "portfolio_urls",
+        "method": "regex",
+        "rule": "contact_url_host_or_explicit_label",
+        "source_text": "https://jordan.example.test",
+        "confidence": "medium"
+      },
+      {
+        "field": "name",
+        "method": "heuristic",
+        "rule": "explicit_name_label",
+        "source_text": "Name: Jordan Example",
+        "confidence": "high"
+      }
+    ]
+  },
+  "entities": [
+    {
+      "text": "Jordan Example\njordan@example.test\nPhone",
+      "label": "PERSON",
+      "start": 6,
+      "end": 46,
+      "confidence": null
+    },
+    {
+      "text": "Example Labs",
+      "label": "PERSON",
+      "start": 303,
+      "end": 315,
+      "confidence": null
+    },
+    {
+      "text": "Issuer",
+      "label": "ORG",
+      "start": 516,
+      "end": 522,
+      "confidence": null
+    },
+    {
+      "text": "Example Institute",
+      "label": "ORG",
+      "start": 524,
+      "end": 541,
+      "confidence": null
+    }
+  ],
+  "nlp": {
+    "model": "en_core_web_sm",
+    "model_version": "3.8.0",
+    "status": "available",
+    "custom_trained": false,
+    "language": "en"
+  },
+  "warnings": [
+    "Extraction is evidence-based and incomplete; missing fields remain null. Review results before use."
+  ]
+}

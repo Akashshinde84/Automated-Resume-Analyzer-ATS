@@ -1,0 +1,14 @@
+*
+!Dockerfile
+!requirements.txt
+!requirements-production.txt
+!constraints-production.txt
+!app/
+!app/**
+!scripts/
+!scripts/start.py
+!alembic.ini
+!alembic/
+!alembic/**
+**/__pycache__
+**/*.pyc

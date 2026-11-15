@@ -1,0 +1,1066 @@
+{
+  "generated_at": "2026-11-15T17:51:30.108479+00:00",
+  "dataset_sha256": "8d32fad5deb665b9dd2141aaa33aa2be912fd952c34e366f9ab1d647128b0e4c",
+  "cases": 20,
+  "formats": {
+    "pdf": 10,
+    "docx": 10
+  },
+  "skills_micro": {
+    "tp": 55,
+    "fp": 0,
+    "fn": 1,
+    "precision": 1.0,
+    "recall": 0.9821428571428571,
+    "f1": 0.990990990990991
+  },
+  "entities_micro": {
+    "tp": 11,
+    "fp": 42,
+    "fn": 32,
+    "precision": 0.20754716981132076,
+    "recall": 0.2558139534883721,
+    "f1": 0.22916666666666666
+  },
+  "entities_by_label": {
+    "PERSON": {
+      "tp": 7,
+      "fp": 13,
+      "fn": 11,
+      "precision": 0.35,
+      "recall": 0.3888888888888889,
+      "f1": 0.3684210526315789
+    },
+    "ORG": {
+      "tp": 4,
+      "fp": 29,
+      "fn": 21,
+      "precision": 0.12121212121212122,
+      "recall": 0.16,
+      "f1": 0.13793103448275862
+    }
+  },
+  "section_presence": {
+    "correct_decisions": 137,
+    "decisions": 140,
+    "accuracy": 0.9785714285714285,
+    "exact_documents": 18,
+    "documents": 20,
+    "exact_document_rate": 0.9
+  },
+  "fields": {
+    "name": {
+      "tp": 18,
+      "fp": 0,
+      "fn": 0,
+      "cases": 20,
+      "exact_cases": 20,
+      "populated_gold_cases": 18,
+      "successful_populated_cases": 18,
+      "empty_gold_cases": 2,
+      "correct_empty_cases": 2,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_case_rate": 1.0,
+      "populated_success_rate": 1.0
+    },
+    "emails": {
+      "tp": 12,
+      "fp": 0,
+      "fn": 0,
+      "cases": 20,
+      "exact_cases": 20,
+      "populated_gold_cases": 12,
+      "successful_populated_cases": 12,
+      "empty_gold_cases": 8,
+      "correct_empty_cases": 8,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_case_rate": 1.0,
+      "populated_success_rate": 1.0
+    },
+    "phones": {
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "cases": 20,
+      "exact_cases": 20,
+      "populated_gold_cases": 2,
+      "successful_populated_cases": 2,
+      "empty_gold_cases": 18,
+      "correct_empty_cases": 18,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_case_rate": 1.0,
+      "populated_success_rate": 1.0
+    },
+    "institution": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 0,
+      "cases": 20,
+      "exact_cases": 20,
+      "populated_gold_cases": 10,
+      "successful_populated_cases": 10,
+      "empty_gold_cases": 10,
+      "correct_empty_cases": 10,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_case_rate": 1.0,
+      "populated_success_rate": 1.0
+    },
+    "degree": {
+      "tp": 9,
+      "fp": 0,
+      "fn": 1,
+      "cases": 20,
+      "exact_cases": 19,
+      "populated_gold_cases": 10,
+      "successful_populated_cases": 9,
+      "empty_gold_cases": 10,
+      "correct_empty_cases": 10,
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1": 0.9473684210526315,
+      "exact_case_rate": 0.95,
+      "populated_success_rate": 0.9
+    },
+    "field": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 1,
+      "cases": 20,
+      "exact_cases": 19,
+      "populated_gold_cases": 11,
+      "successful_populated_cases": 10,
+      "empty_gold_cases": 9,
+      "correct_empty_cases": 9,
+      "precision": 1.0,
+      "recall": 0.9090909090909091,
+      "f1": 0.9523809523809523,
+      "exact_case_rate": 0.95,
+      "populated_success_rate": 0.9090909090909091
+    },
+    "company": {
+      "tp": 14,
+      "fp": 0,
+      "fn": 1,
+      "cases": 20,
+      "exact_cases": 19,
+      "populated_gold_cases": 14,
+      "successful_populated_cases": 13,
+      "empty_gold_cases": 6,
+      "correct_empty_cases": 6,
+      "precision": 1.0,
+      "recall": 0.9333333333333333,
+      "f1": 0.9655172413793104,
+      "exact_case_rate": 0.95,
+      "populated_success_rate": 0.9285714285714286
+    },
+    "job_title": {
+      "tp": 15,
+      "fp": 0,
+      "fn": 1,
+      "cases": 20,
+      "exact_cases": 19,
+      "populated_gold_cases": 15,
+      "successful_populated_cases": 14,
+      "empty_gold_cases": 5,
+      "correct_empty_cases": 5,
+      "precision": 1.0,
+      "recall": 0.9375,
+      "f1": 0.967741935483871,
+      "exact_case_rate": 0.95,
+      "populated_success_rate": 0.9333333333333333
+    },
+    "work_start": {
+      "tp": 14,
+      "fp": 0,
+      "fn": 1,
+      "cases": 20,
+      "exact_cases": 19,
+      "populated_gold_cases": 14,
+      "successful_populated_cases": 13,
+      "empty_gold_cases": 6,
+      "correct_empty_cases": 6,
+      "precision": 1.0,
+      "recall": 0.9333333333333333,
+      "f1": 0.9655172413793104,
+      "exact_case_rate": 0.95,
+      "populated_success_rate": 0.9285714285714286
+    },
+    "work_end": {
+      "tp": 14,
+      "fp": 0,
+      "fn": 1,
+      "cases": 20,
+      "exact_cases": 19,
+      "populated_gold_cases": 14,
+      "successful_populated_cases": 13,
+      "empty_gold_cases": 6,
+      "correct_empty_cases": 6,
+      "precision": 1.0,
+      "recall": 0.9333333333333333,
+      "f1": 0.9655172413793104,
+      "exact_case_rate": 0.95,
+      "populated_success_rate": 0.9285714285714286
+    },
+    "project": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "cases": 20,
+      "exact_cases": 20,
+      "populated_gold_cases": 7,
+      "successful_populated_cases": 7,
+      "empty_gold_cases": 13,
+      "correct_empty_cases": 13,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_case_rate": 1.0,
+      "populated_success_rate": 1.0
+    },
+    "certification": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "cases": 20,
+      "exact_cases": 20,
+      "populated_gold_cases": 3,
+      "successful_populated_cases": 3,
+      "empty_gold_cases": 17,
+      "correct_empty_cases": 17,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_case_rate": 1.0,
+      "populated_success_rate": 1.0
+    }
+  },
+  "results": [
+    {
+      "id": "r01",
+      "format": "pdf",
+      "layout": "single_column",
+      "characters": 411,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "avery stone"
+          ],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "cedar labs",
+            "northstar university"
+          ],
+          "extra": [
+            "avery stone",
+            "northstar university bachelor of science in computer science",
+            "sql"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r02",
+      "format": "docx",
+      "layout": "table",
+      "characters": 265,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "sofía marín"
+          ],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "harbor college"
+          ],
+          "extra": [
+            "background harbor college bachelor of arts in design work history",
+            "core competencies reactjs",
+            "css",
+            "html"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r03",
+      "format": "pdf",
+      "layout": "bullets",
+      "characters": 207,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "blake rowan"
+          ],
+          "extra": [
+            "docker"
+          ]
+        },
+        "ORG": {
+          "missing": [],
+          "extra": [
+            "git employment history platform engineer",
+            "kubernetes"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r04",
+      "format": "docx",
+      "layout": "header",
+      "characters": 248,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "李明"
+          ],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "lumen university"
+          ],
+          "extra": [
+            "ml academic qualifications lumen university master of science in data science"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r05",
+      "format": "pdf",
+      "layout": "two_column",
+      "characters": 241,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": [
+            "java"
+          ]
+        },
+        "ORG": {
+          "missing": [
+            "aster institute",
+            "willow solutions"
+          ],
+          "extra": []
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r06",
+      "format": "docx",
+      "layout": "bullets",
+      "characters": 224,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "अनया राव"
+          ],
+          "extra": [
+            "key skills",
+            "meadow labs mar 2021 - dec 2023"
+          ]
+        },
+        "ORG": {
+          "missing": [
+            "meadow labs",
+            "saffron university"
+          ],
+          "extra": [
+            "sql",
+            "tableau education saffron university bachelor of science in mathematics professional experience data"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r07",
+      "format": "pdf",
+      "layout": "single_column",
+      "characters": 182,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [],
+          "extra": [
+            "javascript",
+            "react.js"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r08",
+      "format": "docx",
+      "layout": "single_column",
+      "characters": 159,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "flint systems"
+          ],
+          "extra": [
+            "flint systems role: software developer"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r09",
+      "format": "pdf",
+      "layout": "multipage",
+      "characters": 263,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "ellis reed"
+          ],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "acorn labs",
+            "fern systems",
+            "oakridge college"
+          ],
+          "extra": [
+            "sql"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r10",
+      "format": "docx",
+      "layout": "table",
+      "characters": 279,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [
+          "go"
+        ],
+        "extra": []
+      },
+      "sections": {
+        "missing": [
+          "skills"
+        ],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "fatima noor"
+          ],
+          "extra": [
+            "fatima noor professional"
+          ]
+        },
+        "ORG": {
+          "missing": [
+            "citrine labs"
+          ],
+          "extra": []
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r11",
+      "format": "pdf",
+      "layout": "single_column",
+      "characters": 174,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "gray quinn"
+          ],
+          "extra": [
+            "gray quinn summary"
+          ]
+        },
+        "ORG": {
+          "missing": [],
+          "extra": []
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r12",
+      "format": "docx",
+      "layout": "single_column",
+      "characters": 189,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "université des brumes"
+          ],
+          "extra": [
+            "pandas education université des brumes"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r13",
+      "format": "pdf",
+      "layout": "bullets",
+      "characters": 221,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "indigo shaw"
+          ],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "opal labs"
+          ],
+          "extra": [
+            "css",
+            "react work history",
+            "typescript"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r14",
+      "format": "docx",
+      "layout": "header",
+      "characters": 187,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "glacier university"
+          ],
+          "extra": [
+            "certifications accounting foundations certificate",
+            "glacier university bachelor of commerce"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r15",
+      "format": "pdf",
+      "layout": "single_column",
+      "characters": 148,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": [
+            "cobalt labs",
+            "docker"
+          ]
+        },
+        "ORG": {
+          "missing": [
+            "cobalt labs"
+          ],
+          "extra": [
+            "git professional experience backend engineer"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r16",
+      "format": "docx",
+      "layout": "single_column",
+      "characters": 134,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [
+          "education",
+          "experience"
+        ],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": [
+            "computing",
+            "moss studio"
+          ]
+        },
+        "ORG": {
+          "missing": [
+            "moss studio"
+          ],
+          "extra": [
+            "sql"
+          ]
+        }
+      },
+      "field_errors": {
+        "degree": {
+          "expected": [
+            "diploma"
+          ],
+          "actual": []
+        },
+        "field": {
+          "expected": [
+            "computing"
+          ],
+          "actual": []
+        },
+        "company": {
+          "expected": [
+            "moss studio"
+          ],
+          "actual": []
+        },
+        "job_title": {
+          "expected": [
+            "engineer"
+          ],
+          "actual": []
+        },
+        "work_start": {
+          "expected": [
+            "2022"
+          ],
+          "actual": []
+        },
+        "work_end": {
+          "expected": [
+            "present"
+          ],
+          "actual": []
+        }
+      }
+    },
+    {
+      "id": "r17",
+      "format": "pdf",
+      "layout": "two_column",
+      "characters": 234,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "morgan frost"
+          ],
+          "extra": [
+            "machine learning"
+          ]
+        },
+        "ORG": {
+          "missing": [
+            "slate labs"
+          ],
+          "extra": [
+            "morgan frost morgan@example.test technical skills builds",
+            "pytorch"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r18",
+      "format": "docx",
+      "layout": "bullets",
+      "characters": 244,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [
+            "noor azad"
+          ],
+          "extra": [
+            "library database"
+          ]
+        },
+        "ORG": {
+          "missing": [
+            "pinecrest college"
+          ],
+          "extra": [
+            "sql"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r19",
+      "format": "pdf",
+      "layout": "single_column",
+      "characters": 163,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": []
+        },
+        "ORG": {
+          "missing": [
+            "winter university"
+          ],
+          "extra": [
+            "education"
+          ]
+        }
+      },
+      "field_errors": {}
+    },
+    {
+      "id": "r20",
+      "format": "docx",
+      "layout": "table",
+      "characters": 205,
+      "model": {
+        "model": "en_core_web_sm",
+        "model_version": "3.8.0",
+        "status": "available",
+        "custom_trained": false,
+        "language": "en"
+      },
+      "skills": {
+        "missing": [],
+        "extra": []
+      },
+      "sections": {
+        "missing": [],
+        "extra": []
+      },
+      "entity_errors": {
+        "PERSON": {
+          "missing": [],
+          "extra": [
+            "redis"
+          ]
+        },
+        "ORG": {
+          "missing": [],
+          "extra": [
+            "projects cache service built"
+          ]
+        }
+      },
+      "field_errors": {}
+    }
+  ],
+  "limitations": [
+    "Synthetic developer-authored diagnostic set; not independently human reviewed or representative.",
+    "No held-out real-world corpus, confidence intervals, hiring outcomes, fairness or calibration claim.",
+    "Entity scores compare unique exact normalized PERSON/ORG values per resume, not BIO spans.",
+    "Field sets measure value recovery, not alignment of multiple employment/education records.",
+    "Section accuracy measures seven binary presence decisions per document, not boundary offsets."
+  ]
+}
