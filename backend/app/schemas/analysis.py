@@ -8,6 +8,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from app.schemas.candidate import ExtractionResult
 from app.schemas.matching import MatchingResponse, MatchingWeights, ParsedResumeInput
 from app.schemas.skills import DetectedSkill
+from app.schemas.document import DocumentLink, LayoutBlock
+from app.schemas.readiness import ReadinessResult
 
 
 class FileMetadata(BaseModel):
@@ -26,6 +28,9 @@ class ParsedResumeData(BaseModel):
     metadata: FileMetadata
     skills: list[DetectedSkill]
     skill_ontology_version: str
+    raw_text: str | None = None
+    hyperlinks: list[DocumentLink] = Field(default_factory=list)
+    layout_blocks: list[LayoutBlock] = Field(default_factory=list)
 
 
 class AnalysisResponse(BaseModel):
@@ -35,6 +40,7 @@ class AnalysisResponse(BaseModel):
     expires_at: datetime | None = None
     parsed: ParsedResumeData
     extraction: ExtractionResult
+    readiness: ReadinessResult | None = None
     report_token: str | None = Field(default=None, max_length=1024)
 
 

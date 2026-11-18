@@ -4,6 +4,7 @@ import re
 from app.schemas.matching import (
     Evidence, JobSkill, MatchingRequest, MatchingResponse, MatchingScores, MatchingWeights,
     SkillComparison, Suggestion,
+    SupportingRecord,
 )
 from app.services.matching.job import job_units
 from app.services.matching.safety import affirmative, resume_units
@@ -76,9 +77,15 @@ class MatchingService:
         for skill in comparisons:
             if not skill.matched and skill.importance in {"required", "preferred"}:
                 suggestions.append(Suggestion(code="review_requirement_gap" if skill.importance == "required" else "review_preferred_gap",
+                    priority="high" if skill.importance == "required" else "medium",
+                    problem=f"No qualifying resume evidence found for {skill.name}.",
+                    why="This skill appears in the job description. Missing evidence is not proof that you lack the ability.",
                     skill=skill.name, message=f"No qualifying resume evidence for {skill.name} was found. Review this job criterion against your actual background; do not list this skill without substantiating experience."))
             elif skill.matched and not any(e.section == "skills" for e in skill.resume_evidence):
                 suggestions.append(Suggestion(code="surface_existing_evidence", skill=skill.name,
+                    priority="low", section="skills",
+                    problem=f"Existing {skill.name} evidence is outside the Skills section.",
+                    why="An accurate skill list can help readers find evidence that is already present. This skill is already counted in matching.",
                     message=f"Your resume already mentions {skill.name}. If it reflects your experience, make that existing evidence easier to find in Skills and describe the work accurately; do not invent proficiency or outcomes.",
                     resume_evidence=skill.resume_evidence))
         scores = MatchingScores()
@@ -110,9 +117,27 @@ class MatchingService:
             "TF-IDF is lexical similarity, not semantic understanding. Ontology coverage, section boundaries, negation and requirement rules are incomplete; review evidence manually.",
             "Unlabeled requirements stay unspecified. No automatic hiring/rejection decision or threshold is provided.",
         ])
+        # Record support is evidence containment, not a new score or inferred qualification.
+        from app.services.parser import segment_sections
+        from app.services.extraction.records import project_records, experience_records
+        sections, _ = segment_sections(resume_text)
+        support = []
+        for section, records in (("projects", project_records(sections.get("projects", ""))),
+                                 ("experience", experience_records(sections.get("experience", ""), ()))):
+            cursor = 0
+            for record in records:
+                start = resume_text.find(record.raw_text, cursor)
+                if start < 0:
+                    continue
+                end = start + len(record.raw_text)
+                evidence = [e for skill in matched for e in skill.resume_evidence if start <= e.start < end and e.section == section]
+                names = [skill.name for skill in matched if any(start <= e.start < end and e.section == section for e in skill.resume_evidence)]
+                if names:
+                    support.append(SupportingRecord(section=section, name=getattr(record, "name", None) or getattr(record, "job_title", None), skills=names, evidence=evidence[:5]))
+                cursor = end
         return MatchingResponse(status=status, scores=scores, weights=weights, effective_weights=effective,
             formula=FORMULA, ontology_version=self.extractor.ontology.version, required_skills=required,
             preferred_skills=[s for s in comparisons if s.importance == "preferred"],
             unspecified_skills=[s for s in comparisons if s.importance == "unspecified"], matched_skills=matched,
             missing_required_skills=missing, suggestions=suggestions, shared_text_features=features,
-            warnings=list(dict.fromkeys(warnings)))
+            warnings=list(dict.fromkeys(warnings)), supporting_records=support)

@@ -1,231 +1,214 @@
-# Production deployment: GitHub → Render + Vercel
+# Deploy anonymous Resume Analyzer: GitHub + Vercel + Render
 
-Status (2026-11-15): configuration prepared; **no live deployment or live URLs verified**.
-Account authorization and a successful Linux container CI run are required before release.
-The public site supports one private deployment owner. It is not anonymous resume
-processing or multi-user SaaS. Keep the bearer token private; never share one token
-with unrelated users. PostgreSQL is unnecessary for the initial stateless deployment.
+Current behavior (2026-11-16): no login or owner token. Processing is anonymous,
+stateless and does not connect to PostgreSQL. No live URLs or deployment success
+have been verified. Follow the release checks before publishing.
 
-## 1. GitHub authorization and push
+## Source control and account handoff
 
-This workspace has no remote and originally had no commits. The connected GitHub
-account is `Akashshinde84`; its connector cannot create a repository. In GitHub,
-sign in, select **New repository**, choose a name (for example
-`automated-resume-analyzer`), and create an **empty private repository**. Do not
-initialize a README, license or .gitignore. Authorize this repository for Render
-and Vercel when each platform asks. Never upload `.env`, resumes or tokens.
-
-Run from the workspace root in PowerShell after reviewing `git status`:
+Review `git status`, tests and source secret scanning. Create/select the intended
+GitHub repository and authorize Vercel/Render to read it. From the repository root:
 
 ```powershell
-git log -1 --oneline
 git remote -v
-# Replace OWNER/REPOSITORY with the actual newly created empty repository.
+# Only if no intended origin exists; replace OWNER/REPOSITORY:
 git remote add origin https://github.com/OWNER/REPOSITORY.git
+git add README.md backend frontend docs render.yaml .github
+# Review the staged changes before committing:
+git diff --cached --stat
+git commit -m "Enable anonymous stateless resume analysis"
 git push -u origin HEAD:main
 ```
 
-If `origin` already exists, inspect it and use it only if it is the intended
-repository; do not replace it blindly. If the remote contains commits, fetch and
-review them before integrating; never force-push. Git Credential Manager may
-open interactive GitHub authorization. Do not paste credentials into commands.
-Wait for all QA jobs, including `production-container`, to pass on GitHub.
-Local Windows tests do not establish Linux production compatibility.
+Never overwrite an existing remote or force-push. Do not stage actual environment
+files, uploaded resumes or databases. The repository ignores them; the secret guard
+is an additional check, not proof that secrets cannot exist. Wait for all GitHub
+QA jobs including the production-container build/smoke job. Account authorization
+must be completed interactively by the owner; no cloud resources were created here.
 
-## 2. Reserve the frontend origin
+## Vercel frontend
 
-Sign in to [Vercel](https://vercel.com/new), authorize GitHub, and import the repo.
-Set **Root Directory: `frontend`**, **Framework Preset: Vite**, **Node.js: 22.x**,
-**Install Command: `npm ci`**, **Build Command: `npm run build`**, and
-**Output Directory: `dist`**. These commands also live in `frontend/vercel.json`.
-Choose the project name and note its actual Production domain from **Settings →
-Domains**. It is a configuration value, not proof that the application works.
-If a first build is needed to reserve the domain, it will fail safely until the
-production API URL is set. Do not work around that guard with an invented URL.
-
-## 3. Render backend
-
-Sign in to [Render](https://dashboard.render.com/), authorize the repository,
-then **New → Blueprint**, select the `main` branch and root `render.yaml`.
-Review the paid instance selection before creating it. The blueprint selects
-`standard` (approximately 2 GB RAM / 1 CPU); this is a conservative starting
-budget for spaCy plus a 384 MiB decoder child, not a measured capacity guarantee.
-
-The equivalent manual **New → Web Service** settings are:
+Import the GitHub repository at https://vercel.com/new. Configure:
 
 | Setting | Value |
 | --- | --- |
-| Language/runtime | Docker |
-| Branch | `main` |
-| Root Directory | leave blank |
-| Dockerfile Path | `./backend/Dockerfile` |
-| Docker Build Context | `./backend` |
-| Docker Command | leave blank; image CMD is `python scripts/start.py` |
-| Health Check Path | `/health` |
-| Auto-Deploy | Off until QA and smoke checks pass |
-| Instance | Standard / 2 GB starting budget; verify current dashboard offering |
+| Root directory | `frontend` |
+| Framework | Vite |
+| Node | 22.x |
+| Install | `npm ci` |
+| Build | `npm run build` |
+| Output | `dist` |
+| Production `VITE_API_BASE_URL` | Actual HTTPS Render API origin, no `/api/v1` suffix |
+| `VITE_MAX_UPLOAD_MB` | `10` |
 
-No shell Build Command is used: Docker installs `requirements-production.txt`,
-applies runtime constraints, installs the exact spaCy 3.8.0 model wheel, and loads
-it during the build. Python 3.11 is supplied by `python:3.11-slim`. The start
-script binds **`0.0.0.0:$PORT`**, defaulting to 8000 outside Render, with one
-worker and access logging disabled. Render sets `PORT`; do not pin it to localhost.
-The model is warmed at startup; missing model/configuration aborts startup.
+These settings are also in `frontend/vercel.json`. React Router deep links rewrite
+to index.html. The homepage opens the upload dashboard directly. No credentials
+belong in frontend variables. Production builds reject missing, HTTP, localhost,
+credential-bearing or path-bearing API origins. Environment changes need redeploying.
+Reserve/note the actual production domain in Settings ? Domains before configuring
+Render CORS. If an initial build fails until the API exists, configure the real URL
+and redeploy; do not invent a working URL to bypass validation.
 
-Set **Environment** values (JSON arrays must remain valid JSON):
+## Render backend
 
-| Variable | Production value / handling |
+In https://dashboard.render.com choose New ? Blueprint, select the repository,
+branch and root `render.yaml`. Review costs before creating the service. Equivalent
+manual Web Service settings:
+
+| Setting | Value |
+| --- | --- |
+| Runtime | Docker |
+| Repository root directory | blank |
+| Dockerfile | `./backend/Dockerfile` |
+| Build context | `./backend` |
+| Docker command | blank (image CMD is `python scripts/start.py`) |
+| Health check | `/health` |
+| Auto-deploy | Off until QA/smoke passes; later prefer checksPass |
+| Starting compute budget | Standard / approximately 2 GB and 1 CPU; verify current offering/cost |
+
+Docker supplies Python 3.11, installs production constraints and the hash-pinned
+spaCy en_core_web_sm 3.8.0 wheel, verifies it, and runs as a non-root user. The start
+script binds **0.0.0.0** and reads the platform **PORT** (fallback 8000 locally),
+uses one worker, limits concurrent connections and disables access logs. Model
+loading is verified during production startup. No shell build/start override is
+needed. Local Docker's Linux engine was unavailable; the Linux build remains a
+CI/release gate. Constraints are not a fully hashed lock; audit the actual image.
+
+Set these backend environment variables:
+
+| Variable | Value |
 | --- | --- |
 | `DEPLOYMENT_ENVIRONMENT` | `production` |
-| `APP_MODE` | `single_user` |
-| `SINGLE_USER_API_KEY` | generated secret, at least 32 random characters; owner only |
-| `REPORT_SIGNING_KEY` | separate generated secret, at least 32 random characters; server only |
-| `CORS_ORIGINS` | JSON array containing only the actual HTTPS Vercel production origin, without a path |
-| `ALLOWED_HOSTS` | JSON array containing the actual Render hostname; also any explicitly used API custom hostname |
+| `APP_MODE` | `anonymous` |
 | `STORAGE_ENABLED` | `false` |
-| `DATABASE_URL` | omit while stateless |
-| `REQUIRE_NER_MODEL` | `true` |
+| `REPORT_SIGNING_KEY` | Independently generated random secret, at least 32 characters; server only |
+| `CORS_ORIGINS` | JSON array containing only the actual HTTPS Vercel production origin |
+| `ALLOWED_HOSTS` | JSON array containing actual Render API hostname and any explicitly used custom API hostname |
 | `SPACY_MODEL` | `en_core_web_sm` |
+| `REQUIRE_NER_MODEL` | `true` |
 | `ISOLATE_PARSING` | `true` |
 | `PARSER_TIMEOUT_SECONDS` | `25` |
 | `PARSER_MEMORY_MB` | `384` |
 | `MAX_CONCURRENT_PROCESSING` | `1` |
-| `MAX_UPLOAD_BYTES` | `10485760` (10 MiB) |
+| `MAX_UPLOAD_BYTES` | `10485760` |
 | `MAX_DOCX_UNCOMPRESSED_BYTES` | `52428800` (default) |
 | `MAX_PDF_PAGES` | `50` |
+| `ANONYMOUS_REQUESTS_PER_MINUTE` | `30` |
+| `ANONYMOUS_GLOBAL_REQUESTS_PER_MINUTE` | `120` |
 | `REPORT_TOKEN_TTL_SECONDS` | `3600` (default) |
 
-The blueprint generates both secrets and prompts for origins/hosts. Get the exact
-Render hostname from its service dashboard. If it is assigned only after creation,
-the initial health check can fail: update `ALLOWED_HOSTS` with that hostname and
-redeploy. Do not use `*`. CORS is a browser restriction; bearer authorization is
-the access control. Do not authorize arbitrary Vercel preview subdomains.
+Remove `SINGLE_USER_API_KEY` and `SINGLE_USER_ID` from this public service's settings.
+Omit `DATABASE_URL`. They are not needed for anonymous processing. Keep the server
+signing key: it protects the integrity of current report snapshots and is never
+entered by a user. The Blueprint generates it. To generate independently in a
+private local terminal: `python -c "import secrets; print(secrets.token_urlsafe(48))"`.
+Paste the output only into Render's secret field, never Git or VITE variables.
 
-Model weights download at build time, never during user requests. Runtime pins
-are a version snapshot, not a hashed supply-chain lock: NumPy/SciPy use Python
-3.11-compatible versions, and container CI must validate the resulting environment.
-The model wheel has a SHA-256 pin from the locally installed artifact metadata;
-this pins its bytes and is not independent provenance verification.
-The base image tag is not digest-pinned. Audit the built image and model artifact
-before relying on supply-chain assurances; PyPI auditing skips the model wheel.
+Actual API hostname may be assigned after service creation. Update ALLOWED_HOSTS
+with it, then redeploy if the first health check failed. CORS arrays must contain
+exact origins without paths or wildcards. Do not allow arbitrary preview domains.
+Preview environments should use their own explicitly configured staging backend.
+CORS limits browsers; public API clients can still call the API, so it is not abuse
+protection or authentication. Configure edge controls as appropriate.
 
-## 4. Complete Vercel configuration
+## Database and existing private records
 
-In **Project → Settings → Environment Variables**, set for **Production**:
+No PostgreSQL service, migrations or persistent disk is required. Anonymous mode
+refuses `STORAGE_ENABLED=true`, never initializes a DB, denies all `/analyses`
+list/read/delete requests, rejects `store=true`, and rejects stored IDs in matching
+or reports. An old owner Authorization header does not grant anonymous-mode access.
+Existing database records and backups are left untouched and remain private.
 
-```text
-VITE_API_BASE_URL = the actual HTTPS Render API origin (no /api/v1 suffix)
-VITE_MAX_UPLOAD_MB = 10
-```
+Legacy `APP_MODE=single_user` backend operation still requires an owner secret and
+per-owner access checks, for retained integrations/tests. It is not supported by the
+new public frontend. If owner data maintenance is necessary, use a separately
+controlled authenticated service or offline administration; never enable a public
+history UI or share an owner credential across anonymous users. Any future public
+persistence requires real session/user authorization before it is enabled.
 
-These values are public and embedded at build time. Never add `SINGLE_USER_API_KEY`,
-`REPORT_SIGNING_KEY` or `DATABASE_URL` under a `VITE_` name. Redeploy after changes.
-The production build rejects missing, HTTP, localhost and credential-bearing API
-origins. `vercel.json` supplies React Router deep-link rewrites and basic headers.
-Once both URLs exist, check that Render `CORS_ORIGINS` exactly matches the browser
-origin. Add a custom domain only after validating its TLS and updating CORS/hosts.
+## Smoke checks
 
-## 5. Verification and release gate
-
-Use a fictional resume, never real candidate information for smoke testing.
-From PowerShell with backend development dependencies installed:
+From a development environment with backend dependencies installed:
 
 ```powershell
 $env:SMOKE_API_URL = Read-Host 'Actual HTTPS API origin'
 $env:SMOKE_FRONTEND_ORIGIN = Read-Host 'Actual HTTPS frontend origin'
-$privateToken = Read-Host 'Owner API key' -AsSecureString
-$env:SMOKE_API_KEY = [System.Net.NetworkCredential]::new('', $privateToken).Password
-try {
-  backend/.venv/Scripts/python.exe backend/scripts/production_smoke.py
-  if ($LASTEXITCODE -ne 0) { throw 'Deployment smoke verification failed' }
-} finally {
-  Remove-Item Env:SMOKE_API_KEY -ErrorAction SilentlyContinue
-  $privateToken = $null
-}
+backend/.venv/Scripts/python.exe backend/scripts/production_smoke.py
+if ($LASTEXITCODE -ne 0) { throw 'Smoke verification failed' }
 ```
 
-The script checks HTTPS origins, public health, unauthenticated denial, allowed
-and denied CORS, stateless history denial, DOCX/PDF/scanned PDF analysis, actual
-NER, matching, signed JSON/PDF reports and malformed/empty/unsupported uploads.
-It prints no bearer token or resume/report body and saves no candidate files.
-It does not verify frontend rendering, TLS custom-domain provisioning, load
-capacity, malware resistance or persistent history.
+No access key is required. This uses generated fictional resumes and checks public
+health, anonymous DOCX/PDF/scanned parsing, NER, matching, signed JSON/PDF reports,
+invalid uploads, exact-origin CORS and blocked private history. It saves no personal
+files or response bodies. It does not prove deployment capacity or frontend rendering.
 
-In the deployed browser, open `/upload` directly and refresh it; connect using
-the owner token, upload a synthetic DOCX then PDF, review structured data/skills,
-paste a JD, compare, download JSON/PDF, and clear the session. Inspect Network:
-all requests must use the intended HTTPS Render origin, no mixed content or
-unexpected redirects. Test scanned and invalid files, offline retry, mobile
-layout, keyboard traversal and token rejection. Check service metrics for peak
-RSS, CPU, processing latency and safe errors. Only then record actual verified
-URLs and deployment commit SHA in the release record and README.
+In the deployed browser, directly open and refresh `/` and `/upload`. Verify no
+login modal, select a fictional PDF/DOCX, confirm automatic processing/results,
+paste a JD, compare, download both reports, clear the page and reload. Verify mobile
+layout, keyboard access, scanned/invalid files, cancellation and network retry.
+Inspect Network for HTTPS to the actual API, no Authorization headers, no mixed
+content or unexpected redirects. Verify `/api/v1/analyses` returns 403 and a fresh
+browser cannot recover another browser's analysis. Test 429 limits using only a
+controlled staging service. Record actual deployment URLs and commit SHA only
+after all checks pass; none are recorded as live here.
 
-## Optional PostgreSQL: defer until history is required
+## Privacy, resource limits and operations
 
-Keep storage off for this release. To enable it later, provision managed PostgreSQL
-in the backend region, require the provider's TLS configuration, and store URLs
-only as Render secrets. Use a schema-owner migration credential separately from
-a non-superuser runtime role with schema USAGE and SELECT/INSERT/UPDATE/DELETE on
-the four tables; runtime must not have schema CREATE, table TRUNCATE, CREATEROLE,
-CREATEDB or SUPERUSER. Grant sequence usage only if a migration introduces sequences.
+Raw uploads/results use temporary files and are cleaned after processing, including
+safe failures. No resume storage is enabled. Browser data and automatic report
+receipts stay only in tab memory. Signed snapshots expire after one hour by default;
+restart with an ephemeral development key or rotate the production signing key and
+old receipts stop working. Replicas must share the signing key for consistent reports.
+JSON/PDF downloads contain personal data and cannot be deleted by clearing the app.
 
-With the **migration** URL temporarily provided as `DATABASE_URL`, run from
-`backend`: `python -m alembic upgrade head` (Render pre-deploy command on a paid
-service, or a controlled one-off shell). Then configure the runtime-only URL,
-`STORAGE_ENABLED=true`, `RETENTION_DAYS=7`, and validate all owner-scoped CRUD,
-cascade deletion and retention checks against that real database. Avoid putting
-the migration credential permanently into the runtime service. Configure managed
-backups and test restore/deletion behavior. The automated smoke script deliberately
-expects stateless mode; extend its checks before enabling persistence. No production
-PostgreSQL grants, TLS, migrations or backups are claimed as verified here.
+Linux decoder children enforce memory, CPU and output-file limits, plus a parent
+wall timeout. This is resource isolation, not a full filesystem/network sandbox.
+NLP/matching/reports still run in-process with input/concurrency bounds. The 2 GB
+budget is provisional; measure peak RSS, CPU, latency and failures before launch.
+A single model worker avoids memory multiplication. Keep fixed-event error logs;
+never enable body/token/resume/SQL value logging. `/health` indicates successful
+API/model startup, not a guarantee that all requests or dependencies will succeed.
 
-## Operations, limitations and costs
+Rate budgets are bounded in-memory sliding windows per process, using ephemeral
+hashed network identities. Do not trust user X-Forwarded-For. Clients behind a proxy
+may share a budget. Restarts reset counters; replicas have independent counters.
+Add a trusted gateway/distributed rate limiter and validate client-IP forwarding
+before scaling or advertising sustained public capacity. Concurrency returns 429
+with Retry-After; do not automatically replay POST requests on network failure.
 
-Linux decoder children enforce address-space, CPU and output-file limits; the
-parent kills/waits after the wall-clock deadline and removes temporary files.
-This is resource isolation, not a network/filesystem security sandbox. Docker runs
-as a non-root user. Validate Linux limits and the built image in CI before release;
-Windows tests cover decoding/timeouts but skip Linux-specific limits. API NLP,
-matching and reports still run in-process under input/concurrency bounds. Load
-and adversarial stress testing remain necessary. Health indicates started API/model
-availability in production, not complete per-request or optional DB readiness.
+Expect ephemeral storage, cold starts, build/model download failures, platform
+request timeouts, the 25-second decoder limit and 180-second browser upload timeout.
+Large/complex files may fail safely. Free Render instances spin down after idle
+periods and are not the validated production target. Render compute/workspace,
+bandwidth and optional database charges are separate; verify current pricing and
+billing alerts. Vercel Hobby is for non-commercial personal use; choose a suitable
+plan for commercial usage. No resources have been purchased here.
 
-Temporary uploads use ephemeral storage and are deleted after processing. They
-are not a backup; restarts erase local files. One worker avoids duplicate model
-memory. Scaling requires the same report signing secret across replicas. Rotating
-either token or signing secret invalidates existing report receipts; refresh the
-owner connection/reanalyze. Logs use fixed error events without text, names, token,
-filenames or request bodies; do not enable verbose request/SQL tracing in production.
+Known functional limits: no OCR, custom-trained NER, multilingual accuracy guarantee,
+full PDF complex-script shaping, antivirus guarantee, persistent anonymous history,
+independent human relevance labels or hiring decisions. Review the historical QA
+metrics and current [anonymous design](anonymous-processing.md). Do not claim
+production readiness until Linux CI, load/resource, manual accessibility and live
+TLS/CORS/browser smoke gates pass.
 
-Plan for cold starts, model warm-up, build download failures, platform request
-timeouts, 180-second browser upload timeout, 25-second decoder limit and 429 busy
-responses. Do not automatically retry a saved POST. Large/complex PDFs may be
-rejected safely. No OCR, multilingual custom NER, antivirus guarantee, multi-user
-auth, ATS certification or automatic hiring decision is provided. Extraction is
-fallible and requires source review (see the measured Phase 9 report).
+## Rollback and references
 
-Pricing checked 2026-11-15: Render lists the 1 CPU / 2 GB option at about **$25/month**
-before workspace, bandwidth, database, taxes or other usage costs; recheck checkout.
-Free Render services spin down after 15 idle minutes and are unsuitable as the
-validated production target here. Vercel Hobby is for personal non-commercial
-use; commercial use requires an appropriate paid plan. No resources have been
-purchased by this work. Exact platform timeout/billing limits depend on the chosen
-plan; consult the dashboard before launch.
+The readiness upgrade preserves this architecture and needs no database migration.
+Configure `READINESS_WEIGHTS` on the backend only if changing the documented
+100-point rubric; validate that maxima total 100. See [ATS readiness](ats-readiness.md).
+Deploy frontend and backend together and reanalyze open snapshots after the upgrade;
+new readiness data is covered by report integrity receipts. Keep `APP_MODE=anonymous`
+and production isolation/model requirements. A local build or health check does
+not establish successful production deployment. Verify live upload, correct project
+links, separate scores, CORS and both report downloads before release.
 
-Primary references: [Render pricing](https://render.com/pricing),
-[compute plans](https://render.com/docs/compute-plans),
+Deploy the last verified backend image/commit and matching Vercel production
+version if checks fail. No DB migration rollback is needed in stateless mode.
+Keep auto-deploy off until CI is confirmed; never force-push to roll back.
+
+Official references: [Render Blueprint](https://render.com/docs/blueprint-spec),
+[health checks](https://render.com/docs/health-checks), [pricing](https://render.com/pricing),
 [free limitations](https://render.com/docs/free),
-[Blueprint specification](https://render.com/docs/blueprint-spec),
-[health checks](https://render.com/docs/health-checks),
 [Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite),
 [Vercel plans](https://vercel.com/docs/plans/hobby),
-[public Vite environment variables](https://vite.dev/guide/env-and-mode).
-
-## Rollback
-
-Keep Render automatic deployment off until approved checks pass; subsequently
-prefer `checksPass`. Deploy the last verified commit/image in Render and restore
-the corresponding Vercel production deployment if smoke tests fail. Stateless
-mode has no database rollback. For future persistence, review migration downgrade
-and backup/restore plans separately before changing schemas. Never force-push to
-simulate a rollback. No URL should be advertised until verification passes.
+[Vite environment variables](https://vite.dev/guide/env-and-mode).

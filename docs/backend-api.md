@@ -1,3 +1,5 @@
+> Current default: anonymous stateless processing, no login, no persistent history. See [anonymous design](anonymous-processing.md) and [current deployment guide](DEPLOYMENT.md). Owner-token and saved-history instructions below describe the retained legacy single_user backend, not the public frontend.
+
 ﻿# Phase 6: private backend API and optional database
 
 The deployment default is **single-user, authenticated, storage off**. `/health`

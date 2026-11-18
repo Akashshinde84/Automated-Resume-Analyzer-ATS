@@ -1,6 +1,7 @@
 ﻿from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+from app.schemas.document import DocumentLink, LayoutBlock
 import phonenumbers
 
 
@@ -10,7 +11,7 @@ class Schema(BaseModel):
 
 class Evidence(Schema):
     field: str
-    method: Literal["regex", "heuristic", "pretrained_ner", "phone_library"]
+    method: Literal["regex", "heuristic", "pretrained_ner", "phone_library", "document_link"]
     rule: str
     source_text: str
     # Rule strength, not a calibrated model probability. NER scores are unavailable.
@@ -45,6 +46,7 @@ class Education(Record):
     field: str | None = None
     start_date: str | None = None
     end_date: str | None = None
+    grade: str | None = None
 
 
 class WorkExperience(Record):
@@ -59,6 +61,11 @@ class Project(Record):
     name: str | None = None
     description: str | None = None
     urls: list[str] = Field(default_factory=list)
+    technologies: list[str] = Field(default_factory=list)
+    github_url: str | None = None
+    live_url: str | None = None
+    evidence: list[Evidence] = Field(default_factory=list)
+    extraction_warnings: list[str] = Field(default_factory=list)
 
 
 class Certification(Record):
@@ -66,6 +73,13 @@ class Certification(Record):
     issuer: str | None = None
     date: str | None = None
     credential_id: str | None = None
+    description: str | None = None
+    urls: list[str] = Field(default_factory=list)
+
+
+class Activity(Record):
+    name: str | None = None
+    description: str | None = None
 
 
 class Candidate(Schema):
@@ -79,6 +93,8 @@ class Candidate(Schema):
     work_experience: list[WorkExperience] = Field(default_factory=list)
     projects: list[Project] = Field(default_factory=list)
     certifications: list[Certification] = Field(default_factory=list)
+    activities: list[Activity] = Field(default_factory=list)
+    summary: str | None = None
     provenance: list[Evidence] = Field(default_factory=list)
 
 
@@ -95,11 +111,14 @@ class ExtractionResult(Schema):
     entities: list[NamedEntity] = Field(default_factory=list)
     nlp: NLPMetadata
     warnings: list[str] = Field(default_factory=list)
+    work_experience_status: Literal["not_detected", "section_empty", "records_detected"] = "not_detected"
 
 
 class ExtractionRequest(Schema):
     text: str = Field(max_length=100_000)
     phone_region: str | None = None
+    hyperlinks: list[DocumentLink] = Field(default_factory=list, max_length=500)
+    layout_blocks: list[LayoutBlock] = Field(default_factory=list, max_length=5000)
 
     @field_validator("phone_region")
     @classmethod

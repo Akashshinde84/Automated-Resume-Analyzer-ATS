@@ -104,6 +104,9 @@ export function ErrorNotice({ error }) {
     <div className="notice error" role="alert">
       <strong>Something needs attention</strong>
       <p>{typeof error === 'string' ? error : error.message}</p>
+      {error.diagnosticId && (
+        <small>Support reference: {error.diagnosticId}</small>
+      )}
     </div>
   )
 }
@@ -132,11 +135,16 @@ export function Skeleton({ label = 'Loading your analysis…' }) {
     </div>
   )
 }
-export function SafeLink({ value }) {
+export function SafeLink({ value, label, className }) {
   const href = safeUrl(value)
   return href ? (
-    <a href={href} target="_blank" rel="noopener noreferrer">
-      {value}
+    <a
+      href={href}
+      className={className}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {label || value}
       <span className="sr-only"> (opens in a new tab)</span>
     </a>
   ) : (

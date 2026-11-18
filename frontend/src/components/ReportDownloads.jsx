@@ -19,10 +19,6 @@ export function ReportDownloads({ includeMatch = false }) {
   }, [analysis, match])
   if (!analysis) return null
   async function download(format) {
-    if (!workspace.token) {
-      workspace.setSessionOpen(true)
-      return
-    }
     setBusy(format)
     setLast(format)
     setError(null)
@@ -30,7 +26,7 @@ export function ReportDownloads({ includeMatch = false }) {
     const control = workspace.controller()
     active.current = control
     try {
-      const blob = await request('/api/v1/reports', workspace.token, {
+      const blob = await request('/api/v1/reports', {
         method: 'POST',
         signal: control.signal,
         download: format,

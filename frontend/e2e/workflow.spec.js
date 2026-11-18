@@ -35,34 +35,26 @@ async function accessibility(page, label, testInfo) {
 }
 
 const fixture = (name) => path.join(process.env.E2E_FILES_DIR, name)
-async function connect(page) {
+async function openUpload(page) {
   await page.goto('/')
-  await page.getByRole('button', { name: 'Connect backend' }).click()
-  await page.getByRole('button', { name: 'Check API health' }).click()
-  await expect(page.getByRole('status')).toContainText('API is reachable')
-  await page
-    .getByLabel('Private access token', { exact: true })
-    .fill(process.env.E2E_OWNER_TOKEN)
-  await page.getByRole('button', { name: 'Connect securely' }).click()
   await expect(
-    page.getByRole('button', { name: 'Disconnect & clear session' }),
+    page.getByRole('heading', { name: 'AI Resume Analyzer', exact: true }),
   ).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(
+    page.getByLabel('Private access token', { exact: true }),
+  ).toHaveCount(0)
 }
-async function analyze(page, save = false, filename = 'synthetic.docx') {
+async function analyze(page, filename = 'synthetic.docx') {
   await page.getByRole('link', { name: 'Upload resume', exact: true }).click()
-  await page
-    .getByLabel('Choose PDF or DOCX resume')
-    .setInputFiles(fixture(filename))
-  if (save)
-    await page.getByRole('checkbox', { name: /Save this analysis/ }).check()
   const response = page.waitForResponse(
     (response) =>
       response.url().includes('/resumes/analyze?') &&
       response.request().method() === 'POST',
   )
   await page
-    .getByRole('button', { name: 'Analyze resume', exact: true })
-    .click()
+    .getByLabel('Choose PDF or DOCX resume')
+    .setInputFiles(fixture(filename))
   const data = await (await response).json()
   await expect(
     page.getByRole('heading', { name: 'Your experience, organized' }),
@@ -82,10 +74,26 @@ test('real stateless upload, extraction, match, safe retry and scoped JSON/PDF d
 }, testInfo) => {
   const pageErrors = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
-  await connect(page)
+  await openUpload(page)
   const analysis = await analyze(page)
   expect(analysis.id).toBeNull()
   expect(analysis.parsed.text).toContain('Python')
+  expect(analysis.readiness.status).toBe('computed')
+  expect(
+    analysis.readiness.categories.reduce((sum, item) => sum + item.score, 0),
+  ).toBeCloseTo(analysis.readiness.score, 2)
+  await expect(
+    page.getByRole('img', {
+      name: `ATS readiness estimate: ${analysis.readiness.score} out of 100`,
+    }),
+  ).toBeVisible()
+  await expect(page.getByRole('progressbar')).toHaveCount(7)
+  await expect(
+    page.getByRole('link', { name: /GitHub repository/ }),
+  ).toHaveAttribute('href', 'https://github.com/example/resume-platform')
+  await page.getByLabel('Filter by priority').selectOption('low')
+  await expect(page.locator('.priority-high')).toHaveCount(0)
+  await page.getByLabel('Filter by priority').selectOption('all')
   expect(analysis.extraction.candidate.name).toBe('Sofía Rivera')
   await accessibility(page, 'analysis', testInfo)
   expect(analysis.parsed.skills.map((skill) => skill.name)).toEqual(
@@ -109,6 +117,7 @@ test('real stateless upload, extraction, match, safe retry and scoped JSON/PDF d
     ).toString('utf8'),
   )
   expect(initial.match).toBeNull()
+  expect(initial.analysis.readiness).toEqual(analysis.readiness)
   await page.getByRole('link', { name: 'Compare with a job' }).click()
   const job = 'Required skills:\nPython\nSQL\nPreferred skills:\nDocker'
   await page
@@ -177,7 +186,7 @@ test('real stateless upload, extraction, match, safe retry and scoped JSON/PDF d
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true)
-  await page.getByRole('button', { name: 'Disconnect & clear session' }).click()
+  await page.getByRole('button', { name: 'Clear current analysis' }).click()
   await expect(
     page.getByRole('heading', { name: 'A clearer comparison awaits' }),
   ).toBeVisible()
@@ -187,45 +196,35 @@ test('real stateless upload, extraction, match, safe retry and scoped JSON/PDF d
   expect(pageErrors).toEqual([])
 })
 
-test('saved PDF analysis, stored match, private history reopening, reports and confirmed deletion', async ({
+test('anonymous PDF analysis is isolated from fresh browser state and private history', async ({
   page,
-}, testInfo) => {
-  await connect(page)
-  const analysis = await analyze(page, true, 'synthetic.pdf')
-  expect(analysis.id).toBeTruthy()
-  await page.getByRole('link', { name: 'Compare with a job' }).click()
-  await page
-    .getByRole('textbox')
-    .fill('Required: Python, SQL. Preferred: Docker.')
-  await page.getByRole('checkbox', { name: /Save this comparison/ }).check()
-  await page.getByRole('button', { name: 'Compare with resume' }).click()
-  await expect(
-    page.getByText('Comparison saved', { exact: true }),
-  ).toBeVisible()
-  await page.getByRole('link', { name: 'Saved history' }).click()
-  await page.getByRole('button', { name: 'Open analysis' }).first().click()
-  await page.getByRole('button', { name: 'View comparison' }).first().click()
-  const report = JSON.parse(
-    (
-      await download(page, 'Download JSON', testInfo.outputPath('saved.json'))
-    ).toString('utf8'),
+}) => {
+  await openUpload(page)
+  let sentAuthorization = false
+  page.on('request', (r) => {
+    if (r.url().includes('/api/v1/'))
+      sentAuthorization ||= Boolean(r.headers()['authorization'])
+  })
+  const data = await analyze(page, 'synthetic.pdf')
+  expect(data.id).toBeNull()
+  expect(data.stored).toBe(false)
+  expect(await page.getByRole('link', { name: 'Saved history' }).count()).toBe(
+    0,
   )
-  expect(report.analysis.id).toBe(analysis.id)
-  expect(report.match.id).toBeTruthy()
-  await page.getByRole('link', { name: 'Saved history' }).click()
-  await page
-    .getByRole('button', { name: 'Delete', exact: true })
-    .first()
-    .click()
-  await page.getByRole('button', { name: 'Keep analysis' }).click()
-  await expect(
-    page.getByRole('button', { name: 'Open analysis' }),
-  ).toBeVisible()
-  await page.getByRole('button', { name: 'Delete', exact: true }).click()
-  await page.getByRole('button', { name: 'Delete permanently' }).click()
-  await expect(
-    page.getByRole('heading', { name: 'Nothing saved yet' }),
-  ).toBeVisible()
+  const response = await page.request.get(
+    `${process.env.VITE_API_BASE_URL}/api/v1/analyses`,
+  )
+  expect(response.status()).toBe(403)
+  const fresh = await page.context().browser().newPage()
+  try {
+    await fresh.goto(`${process.env.E2E_BASE_URL}/analysis`)
+    await expect(
+      fresh.getByRole('heading', { name: 'Your analysis starts here' }),
+    ).toBeVisible()
+  } finally {
+    await fresh.close()
+  }
+  expect(sentAuthorization).toBe(false)
 })
 
 test('mobile navigation, empty/scanned states and responsive upload', async ({
@@ -258,20 +257,9 @@ test('mobile navigation, empty/scanned states and responsive upload', async ({
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true)
-  await page.getByRole('button', { name: 'Connect backend' }).click()
-  await page
-    .getByLabel('Private access token', { exact: true })
-    .fill(process.env.E2E_OWNER_TOKEN)
-  await page.getByRole('button', { name: 'Connect securely' }).click()
-  await expect(
-    page.getByRole('button', { name: 'Disconnect & clear session' }),
-  ).toBeVisible()
   await page
     .getByLabel('Choose PDF or DOCX resume')
     .setInputFiles(fixture('scan.pdf'))
-  await page
-    .getByRole('button', { name: 'Analyze resume', exact: true })
-    .click()
   await expect(
     page.getByText('No extractable text', { exact: true }),
   ).toBeVisible()
@@ -290,24 +278,21 @@ test('mobile navigation, empty/scanned states and responsive upload', async ({
   })
 })
 
-test('privacy and connection dialog accessibility with keyboard containment', async ({
+test('privacy, direct upload keyboard access and invalid file handling', async ({
   page,
 }, testInfo) => {
   await page.goto('/privacy')
   await accessibility(page, 'privacy', testInfo)
-  const button = page.getByRole('button', { name: 'Connect backend' })
-  await button.click()
-  await expect(page.getByRole('dialog')).toBeVisible()
-  await accessibility(page, 'connection-dialog', testInfo)
-  for (let index = 0; index < 9; index++) {
-    await page.keyboard.press('Tab')
-    expect(
-      await page.evaluate(() =>
-        Boolean(document.activeElement.closest('dialog[open]')),
-      ),
-    ).toBe(true)
-  }
-  await page.keyboard.press('Escape')
-  await expect(page.getByRole('dialog')).not.toBeVisible()
-  await expect(button).toBeFocused()
+  await openUpload(page)
+  await accessibility(page, 'anonymous-upload', testInfo)
+  const browse = page.getByRole('button', { name: 'Browse files', exact: true })
+  await browse.focus()
+  await expect(browse).toBeFocused()
+  await page.getByLabel('Choose PDF or DOCX resume').setInputFiles({
+    name: 'bad.exe',
+    mimeType: 'application/octet-stream',
+    buffer: Buffer.from('invalid'),
+  })
+  await expect(page.getByRole('alert')).toContainText('Only PDF and DOCX')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 })

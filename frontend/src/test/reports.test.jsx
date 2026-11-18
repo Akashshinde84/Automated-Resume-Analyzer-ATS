@@ -21,10 +21,6 @@ function Seed() {
     <>
       <button
         onClick={async () => {
-          await workspace.connect(
-            'test-only-token',
-            new AbortController().signal,
-          )
           workspace.acceptAnalysis(analysis)
           workspace.setMatch(result, 'Original job')
           workspace.setJob('Edited draft')
@@ -52,13 +48,13 @@ it('scopes report sources and binds snapshots to the original comparison job', (
     job_description: 'Original job',
     match: { report_token: 'signed-match' },
   })
-  expect(
+  expect(() =>
     api.reportPayload(
       { id: 'owned-id' },
       { ...result, analysis_id: 'owned-id', stored: true, id: 'match-id' },
       'pdf',
     ),
-  ).toEqual({ analysis_id: 'owned-id', match_id: 'match-id', format: 'pdf' })
+  ).toThrow(/Saved analyses/)
   expect(() =>
     api.reportPayload(
       analysis,
@@ -89,7 +85,7 @@ it('handles report errors with explicit retry and no automatic POST replay', asy
   )
   await userEvent.click(screen.getByRole('button', { name: 'Retry download' }))
   await waitFor(() => expect(save).toHaveBeenCalledOnce())
-  const payload = transport.mock.calls.at(-1)[2].body
+  const payload = transport.mock.calls.at(-1)[1].body
   expect(payload.job_description).toBe('Original job')
   expect(payload.snapshot).toEqual(analysis)
 })
@@ -124,7 +120,7 @@ it('validates download content types and returns binary bytes', async () => {
     headers: new Headers({ 'Content-Type': 'text/html' }),
   })
   await expect(
-    api.request('/api/v1/reports', 'test-token', { download: 'pdf' }),
+    api.request('/api/v1/reports', { download: 'pdf' }),
   ).rejects.toThrow(/unexpected report format/)
   const blob = new Blob(['%PDF'], { type: 'application/pdf' })
   fetch.mockResolvedValue({
@@ -134,6 +130,6 @@ it('validates download content types and returns binary bytes', async () => {
     blob: async () => blob,
   })
   await expect(
-    api.request('/api/v1/reports', 'test-token', { download: 'pdf' }),
+    api.request('/api/v1/reports', { download: 'pdf' }),
   ).resolves.toBe(blob)
 })

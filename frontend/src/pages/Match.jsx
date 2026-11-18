@@ -94,8 +94,8 @@ export function Match() {
             </div>
           </div>
           <div>
-            <p className="eyebrow">COMPATIBILITY ESTIMATE</p>
-            <h2>A starting point for review</h2>
+            <p className="eyebrow">SEPARATE FROM ATS READINESS</p>
+            <h2>Job Match Score</h2>
             <p className="muted">{result.score_meaning}</p>
             <span className="badge">
               {match.stored ? 'Comparison saved' : 'In-memory comparison'}
@@ -121,6 +121,23 @@ export function Match() {
           </section>
         </div>
       </div>
+      {result.supporting_records?.length > 0 && (
+        <section className="card records-card supporting-records">
+          <h2>Projects and experience supporting this match</h2>
+          {result.supporting_records.map((record, index) => (
+            <article className="record" key={index}>
+              <h3>{record.name || 'Untitled record'}</h3>
+              <p className="muted">
+                {record.section} · {record.skills.join(', ')}
+              </p>
+              <Evidence
+                items={record.evidence}
+                label="Supporting skill evidence"
+              />
+            </article>
+          ))}
+        </section>
+      )}
       <details className="card score-explanation">
         <summary>How this estimate is calculated</summary>
         <p className="preserve-lines">{result.formula}</p>
@@ -182,6 +199,22 @@ export function Match() {
               <span>{String(index + 1).padStart(2, '0')}</span>
               <div>
                 <h3>{suggestion.skill}</h3>
+                {suggestion.priority && (
+                  <div className="improvement-meta">
+                    <span
+                      className={`priority priority-${suggestion.priority}`}
+                    >
+                      {suggestion.priority} priority
+                    </span>
+                    <span>{suggestion.section}</span>
+                  </div>
+                )}
+                {suggestion.problem && (
+                  <p>
+                    <strong>{suggestion.problem}</strong>
+                  </p>
+                )}
+                {suggestion.why && <p className="muted">{suggestion.why}</p>}
                 <p>{suggestion.message}</p>
                 <Evidence items={suggestion.resume_evidence} />
               </div>

@@ -1,7 +1,7 @@
-"""Short-lived, owner-bound integrity receipts; no resume content is stored here.
+"""Short-lived snapshot integrity receipts; no resume content is stored here.
 
-Bearer authorization is still mandatory. A receipt cannot grant API access.
-Domain-separated keys prevent these receipts from being used as access tokens.
+Anonymous reports require the complete signed snapshot, never a database ID.
+Legacy owner-mode receipts use a separate domain and still require owner access.
 """
 import base64
 import hashlib
@@ -24,7 +24,7 @@ def digest(value):
 
 def analysis_data(value):
     # Exclude history pagination and every saved comparison, even for AnalysisDetail.
-    return value.model_dump(mode="json", include={"id", "stored", "created_at", "expires_at", "parsed", "extraction"})
+    return value.model_dump(mode="json", include={"id", "stored", "created_at", "expires_at", "parsed", "extraction", "readiness"})
 
 
 def match_data(value):
@@ -36,7 +36,8 @@ class ReportReceipts:
         key = settings.single_user_api_key.get_secret_value() if settings.single_user_api_key else ""
         if not settings.report_signing_key or not settings.report_signing_key.get_secret_value():
             raise RuntimeError("Report signing is not initialized.")
-        context = b"resume-report-v1:" + settings.single_user_id.encode() + b":" + hashlib.sha256(key.encode()).digest()
+        context = (b"resume-report-anonymous-v1" if settings.app_mode == "anonymous" else
+                   b"resume-report-v1:" + settings.single_user_id.encode() + b":" + hashlib.sha256(key.encode()).digest())
         self.key = hmac.digest(settings.report_signing_key.get_secret_value().encode(), context, "sha256")
         self.ttl = settings.report_token_ttl_seconds
 

@@ -9,8 +9,8 @@ import {
   SafeLink,
   Warnings,
 } from '../components/UI'
-import { SavedMatches } from '../components/SavedMatches'
 import { ReportDownloads } from '../components/ReportDownloads'
+import { Readiness } from '../components/Readiness'
 
 function Records({ title, items, kind }) {
   return (
@@ -34,6 +34,12 @@ function Records({ title, items, kind }) {
               </p>
             )}
             {item.field && <p>{item.field}</p>}
+            {item.grade && <p>Grade: {item.grade}</p>}
+            {item.technologies?.length > 0 && (
+              <p className="muted">
+                Technologies: {item.technologies.join(', ')}
+              </p>
+            )}
             {(item.start_date || item.end_date || item.date) && (
               <p className="record-date">
                 {item.date ||
@@ -47,9 +53,31 @@ function Records({ title, items, kind }) {
               <p className="preserve-lines">{item.description}</p>
             )}
             {item.credential_id && <p>Credential: {item.credential_id}</p>}
-            {item.urls?.map((url) => (
-              <SafeLink key={url} value={url} />
-            ))}
+            {(item.github_url || item.live_url) && (
+              <div className="project-actions">
+                {item.github_url && (
+                  <SafeLink
+                    value={item.github_url}
+                    label="GitHub repository"
+                    className="button secondary"
+                  />
+                )}
+                {item.live_url && (
+                  <SafeLink
+                    value={item.live_url}
+                    label="Live demo"
+                    className="button secondary"
+                  />
+                )}
+              </div>
+            )}
+            {item.urls
+              ?.filter(
+                (url) => url !== item.github_url && url !== item.live_url,
+              )
+              .map((url) => (
+                <SafeLink key={url} value={url} />
+              ))}
             <details className="evidence">
               <summary>Source text</summary>
               <p className="preserve-lines">{item.raw_text}</p>
@@ -122,6 +150,7 @@ export function Analysis() {
         </span>
       </div>
       <Warnings items={[...parsed.warnings, ...extraction.warnings]} />
+      <Readiness result={analysis.readiness} />
       {!parsed.text.trim() && (
         <div className="notice warning">
           <strong>No extractable text</strong>
@@ -255,6 +284,12 @@ export function Analysis() {
         </section>
       </div>
       <div className="records-grid">
+        {candidate.summary && (
+          <section className="card records-card">
+            <h2>Summary</h2>
+            <p>{candidate.summary}</p>
+          </section>
+        )}
         <Records
           title="Work experience"
           items={candidate.work_experience}
@@ -267,6 +302,13 @@ export function Analysis() {
           items={candidate.certifications}
           kind="name"
         />
+        {candidate.activities?.length > 0 && (
+          <Records
+            title="Extracurricular activities"
+            items={candidate.activities}
+            kind="name"
+          />
+        )}
       </div>
       <section className="card source-card">
         <details>
@@ -274,18 +316,14 @@ export function Analysis() {
           <pre>{parsed.text || 'No text was extracted.'}</pre>
         </details>
       </section>
-      <SavedMatches
-        key={analysis.id || analysis.created_at}
-        analysis={analysis}
-      />
       <ReportDownloads />
       <div className="inline-actions">
         <button className="button secondary" onClick={workspace.clear}>
           Clear this session’s results
         </button>
         <p className="fine-print">
-          Clearing the view does not delete saved history.{' '}
-          {analysis.stored && <Link to="/history">Manage saved data</Link>}
+          Results are held only in this tab. Downloaded files remain on your
+          device.
         </p>
       </div>
     </>

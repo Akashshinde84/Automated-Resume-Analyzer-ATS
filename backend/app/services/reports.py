@@ -89,7 +89,7 @@ class PDFReport:
             self.add(label, "heading", trusted=True)
 
     def evidence(self, items, label):
-        for item in items:
+        for item in items[:2]:
             source = item.context or item.text
             self.add(f"{label} [{item.section}; characters {item.start}-{item.end}]: {source}", "small")
 
@@ -104,7 +104,9 @@ class PDFReport:
                 self.add(record.description)
             if getattr(record, "urls", None):
                 self.add("Links: " + "; ".join(record.urls))
-            self.add("Source: " + record.raw_text, "small")
+            if getattr(record, "technologies", None):
+                self.add("Technologies: " + ", ".join(record.technologies), "small")
+            # Complete source/provenance is retained in JSON, not duplicated per record.
             for warning in record.warnings:
                 self.add("Extraction note: " + warning, "small")
             self.story.append(Spacer(1, 5))
@@ -123,19 +125,43 @@ class PDFReport:
         if analysis.expires_at:
             self.add("Server record expires: " + analysis.expires_at.isoformat(), "small")
 
+        if analysis.readiness:
+            readiness = analysis.readiness
+            self.heading("ATS readiness")
+            self.add(format_score(readiness.score), "subheading")
+            self.add(readiness.label, "small")
+            self.add("Rubric version: " + readiness.version, "small")
+            for category in readiness.categories:
+                self.add(f"{category.label}: {category.score:g} / {category.maximum}")
+            self.add("Resume strengths", "subheading")
+            self.add("; ".join(readiness.strengths) or "No rubric strengths could be assessed.")
+            self.add("Resume improvements", "subheading")
+            if not readiness.recommendations:
+                self.add("No unmet criteria in this rubric. Review extraction and the full resume manually.")
+            for recommendation in readiness.recommendations[:12]:
+                self.add(f"{recommendation.priority.title()} priority | {recommendation.section}: {recommendation.problem}")
+                self.add(recommendation.suggestion, "small")
+                if recommendation.possible_points is not None:
+                    self.add(f"Up to {recommendation.possible_points:g} rubric points for this criterion; not guaranteed.", "small")
+            if len(readiness.recommendations) > 12:
+                self.add("Additional recommendations and detailed scoring evidence are available in JSON.", "small")
+            self.add("Detailed rule evidence and the scoring formula are available in JSON.", "small")
+
         if match:
             result = match.result
             self.heading("01 / Job compatibility")
-            self.add("Overall estimate: " + format_score(result.scores.overall), "subheading")
+            self.add("Job Match Score: " + format_score(result.scores.overall), "subheading")
             self.add(f"Skill coverage: {format_score(result.scores.skill_overlap)} | Text similarity: {format_score(result.scores.text_similarity)}")
             self.add(result.score_meaning, "small")
             self.add("Formula: " + result.formula)
             self.add("Effective weights: " + "; ".join(f"{key}: {value * 100:.1f}%" for key, value in result.effective_weights.items()), "small")
             self.add(f"Required/preferred/unspecified importance: {result.weights.required_importance:g} / {result.weights.preferred_importance:g} / {result.weights.unspecified_importance:g}", "small")
             self.add(result.method, "small")
+            for record in result.supporting_records[:8]:
+                self.add(f"Supporting {record.section}: {record.name or 'Untitled'} | {', '.join(record.skills)}", "small")
         else:
             self.heading("01 / Job compatibility")
-            self.add("No job comparison included. No score has been generated for this report.")
+            self.add("No job comparison included. The Job Match Score is unavailable; ATS readiness is assessed separately.")
 
         self.heading("02 / Candidate details")
         self.add("Email: " + (", ".join(candidate.emails) or "Not identified"))
@@ -149,14 +175,18 @@ class PDFReport:
         self.heading("03 / Extracted skills and resume evidence")
         if not analysis.parsed.skills:
             self.add("No ontology skills identified.")
+        categories = {}
         for skill in analysis.parsed.skills:
-            self.add(f"{skill.name} | {skill.category} | {'Explicitly listed' if skill.explicitly_listed else 'Mentioned in context'}", "subheading")
-            for occurrence in skill.occurrences:
-                self.add(f"{occurrence.section} / {occurrence.source_type} [{occurrence.start}-{occurrence.end}]: {occurrence.text}", "small")
+            categories.setdefault(skill.category, []).append(skill.name + (" (listed)" if skill.explicitly_listed else " (context)"))
+        for category, names in categories.items():
+            self.add(category.replace("_", " ").title() + ": " + ", ".join(names))
+        self.add("Full skill spans and record source evidence are available in the JSON report.", "small")
         self.records("04 / Work experience", candidate.work_experience, [("company", "Company"), ("job_title", "Role"), ("start_date", "Start"), ("end_date", "End")])
-        self.records("05 / Education", candidate.education, [("institution", "Institution"), ("degree", "Degree"), ("field", "Field"), ("start_date", "Start"), ("end_date", "End")])
+        self.records("05 / Education", candidate.education, [("institution", "Institution"), ("degree", "Degree"), ("field", "Field"), ("start_date", "Start"), ("end_date", "End"), ("grade", "Grade")])
         self.records("06 / Projects", candidate.projects, [("name", "Project")])
         self.records("07 / Certifications", candidate.certifications, [("name", "Certification"), ("issuer", "Issuer"), ("date", "Date"), ("credential_id", "Credential")])
+        if candidate.activities:
+            self.records("Extracurricular activities", candidate.activities, [])
 
         if match:
             result = match.result
@@ -168,18 +198,20 @@ class PDFReport:
                 for skill in skills:
                     status = " | Found" if getattr(skill, "matched", None) is True else " | Not found" if getattr(skill, "matched", None) is False else ""
                     self.add(f"{skill.name} ({skill.importance}){status}")
-                    self.evidence(skill.job_evidence, "Job")
-                    self.evidence(getattr(skill, "resume_evidence", []), "Resume")
+            self.add("Detailed job and resume skill evidence is retained in JSON.", "small")
             self.heading("09 / Evidence-based next steps")
             self.add("Add qualifications only when true and supported by your own experience.", "small")
             if not result.suggestions:
                 self.add("No evidence-based suggestions available.")
-            for suggestion in result.suggestions:
+            for suggestion in result.suggestions[:12]:
                 self.add(suggestion.skill, "subheading")
                 self.add(suggestion.message)
-                self.evidence(suggestion.resume_evidence, "Resume")
+            if len(result.suggestions) > 12:
+                self.add("Additional job suggestions are available in JSON.", "small")
             self.heading("10 / Job description used")
-            self.add(match.job_description)
+            self.add(match.job_description[:1200])
+            if len(match.job_description) > 1200:
+                self.add("Job description preview truncated; the full text is available in JSON.", "small")
 
         # These notices bypass the presentation budget so limits are never hidden.
         self.remaining = max(self.remaining, 4000)

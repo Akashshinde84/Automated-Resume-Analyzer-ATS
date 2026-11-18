@@ -28,16 +28,16 @@ describe('file validation and safe display', () => {
   })
 })
 describe('API transport', () => {
-  it('sends the owner token only in headers with no cache or credentials', async () => {
+  it('sends anonymous requests with no credentials or persistent cache', async () => {
     const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       status: 200,
       ok: true,
       json: async () => ({ total: 0 }),
     })
-    await request('/api/v1/analyses', 'private-test-value')
+    await request('/api/v1/jobs/match')
     expect(fetch.mock.calls[0][0]).not.toContain('private-test-value')
     expect(fetch.mock.calls[0][1]).toMatchObject({
-      headers: { Authorization: 'Bearer private-test-value' },
+      headers: {},
       cache: 'no-store',
       credentials: 'omit',
       redirect: 'error',
@@ -54,7 +54,7 @@ describe('API transport', () => {
         },
       }),
     })
-    await expect(request('/upload', 'token')).rejects.toMatchObject({
+    await expect(request('/upload')).rejects.toMatchObject({
       code: 'bad_signature',
       status: 415,
     })
@@ -63,9 +63,9 @@ describe('API transport', () => {
       ok: false,
       json: async () => ({ detail: [{ input: 'sensitive' }] }),
     })
-    await expect(request('/match', 'token')).rejects.toThrow('Please check')
+    await expect(request('/match')).rejects.toThrow('Please check')
     fetch.mockRejectedValue(new TypeError('Failed fetch'))
-    await expect(request('/match', 'token')).rejects.toThrow('Cannot reach')
+    await expect(request('/match')).rejects.toThrow('Cannot reach')
   })
   it('reports upload progress, sends multipart and supports cancellation', async () => {
     let xhr
@@ -94,7 +94,7 @@ describe('API transport', () => {
     try {
       const control = new AbortController(),
         progress = vi.fn()
-      const pending = uploadResume(new File(['text'], 'cv.pdf'), 'token', {
+      const pending = uploadResume(new File(['text'], 'cv.pdf'), {
         store: false,
         region: 'gb',
         signal: control.signal,
@@ -102,6 +102,9 @@ describe('API transport', () => {
       })
       xhr.upload.onprogress({ lengthComputable: true, loaded: 2, total: 4 })
       expect(progress).toHaveBeenCalledWith(50)
+      xhr.upload.onload()
+      expect(progress).toHaveBeenLastCalledWith(100)
+      expect(xhr.headers).toEqual({})
       expect(xhr.body.get('phone_region')).toBe('GB')
       expect(xhr.url).toContain('store=false')
       control.abort()

@@ -21,7 +21,7 @@ jobs:
           docker run -d --name resume-api-qa --memory=2g --cpus=1 --pids-limit=128
           --cap-drop=ALL --security-opt=no-new-privileges
           -p 8000:10000 -e PORT=10000 -e DEPLOYMENT_ENVIRONMENT=production
-          -e APP_MODE=single_user -e SINGLE_USER_API_KEY=ci-container-disposable-token-000000000000
+          -e APP_MODE=anonymous
           -e REPORT_SIGNING_KEY=ci-container-signing-secret-000000000000
           -e REQUIRE_NER_MODEL=true -e ISOLATE_PARSING=true -e MAX_CONCURRENT_PROCESSING=1
           -e 'CORS_ORIGINS=["https://frontend.example.test"]'
@@ -35,7 +35,6 @@ jobs:
           docker cp backend/scripts/production_smoke.py resume-api-qa:/tmp/production_smoke.py
           docker exec -e SMOKE_API_URL=http://127.0.0.1:10000 \
             -e SMOKE_FRONTEND_ORIGIN=https://frontend.example.test \
-            -e SMOKE_API_KEY=ci-container-disposable-token-000000000000 \
             resume-api-qa python /tmp/production_smoke.py --allow-local
       - if: always()
         run: docker rm -f resume-api-qa
@@ -82,6 +81,7 @@ jobs:
       - run: python -m pytest -q
         working-directory: backend
       - run: python backend/scripts/evaluate_nlp.py
+      - run: python backend/scripts/evaluate_extraction_revision.py
       - run: python backend/scripts/evaluate_matching.py
       - run: python backend/scripts/evaluate_relevance.py
   frontend-and-browser:

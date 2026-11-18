@@ -54,7 +54,7 @@ def test_deadline_is_forwarded_and_private_environment(tmp_path, monkeypatch):
         assert "DATABASE_URL" not in kwargs["env"]
         assert kwargs["timeout"] == 1
         raise subprocess.TimeoutExpired(command, 1)
-    monkeypatch.setattr(subprocess, "run", timeout)
+    monkeypatch.setattr("app.services.isolated_parser.execute_decoder", timeout)
     with pytest.raises(ResumeParseError) as exc:
         parse_isolated(path, ResumeParser(), Settings(_env_file=None, parser_timeout_seconds=1))
     assert exc.value.code == "parsing_timeout"

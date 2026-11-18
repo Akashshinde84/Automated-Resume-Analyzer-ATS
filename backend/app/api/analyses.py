@@ -12,13 +12,17 @@ from app.schemas.analysis import AnalysisDetail, AnalysisPage, AnalysisResponse,
 from app.schemas.candidate import ExtractionRequest
 from app.services.extraction import InformationExtractor
 from app.services.extraction.ner import SpacyNER
+from app.services.diagnostics import failure_reference
 from app.services.matching import MatchingService
 from app.services.report_receipts import ReportReceipts
+from app.services.readiness import ReadinessService
 
 router = APIRouter(prefix="/api/v1", tags=["analyses"])
 
 
 def repository(request):
+    if request.app.state.settings.app_mode == "anonymous":
+        raise HTTPException(403, detail={"code": "private_history_disabled", "message": "Anonymous processing cannot read or save stored analyses."})
     database = request.app.state.database
     if not request.app.state.settings.storage_enabled or database is None:
         raise HTTPException(409, detail={"code": "storage_disabled", "message": "Persistent storage is disabled; use stateless analysis or matching."})
@@ -46,12 +50,15 @@ async def analyze(request: Request, store: bool = Query(False)):
     settings = request.app.state.settings
     try:
         extractor = InformationExtractor(SpacyNER(settings.spacy_model))
-        extracted = await run_in_threadpool(extractor.extract, validated.text, validated.phone_region)
-    except Exception:
-        raise HTTPException(503, detail={"code": "extraction_unavailable", "message": "Candidate extraction is temporarily unavailable."}) from None
+        extracted = await run_in_threadpool(extractor.extract, validated.text, validated.phone_region,
+                                            parsed.get("hyperlinks"), parsed.get("layout_blocks"))
+    except Exception as exc:
+        reference = failure_reference("candidate_extraction", exc)
+        raise HTTPException(500, detail={"code": "extraction_failed", "message": "Candidate analysis failed unexpectedly. Retry Analysis or contact the operator.", "diagnostic_id": reference}) from None
     if settings.require_ner_model and extracted.nlp.status != "available":
         raise HTTPException(503, detail={"code": "model_unavailable", "message": "The configured required NER model is unavailable."})
     result = AnalysisResponse(created_at=datetime.now(timezone.utc), parsed=ParsedResumeData.model_validate(parsed), extraction=extracted)
+    result.readiness = await run_in_threadpool(ReadinessService(settings.readiness_weights).evaluate, result.parsed, result.extraction)
     result = await run_in_threadpool(repo.save, result) if repo else result
     return ReportReceipts(settings).sign_analysis(result)
 

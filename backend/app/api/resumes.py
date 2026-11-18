@@ -98,7 +98,10 @@ async def read_resume_upload(request: Request, allow_phone_region: bool = False)
             parsed = await run_in_threadpool(_parse_upload, upload, filename, parser, settings)
             return parsed, form.get("phone_region") if allow_phone_region else None
         except ResumeParseError as exc:
-            raise HTTPException(exc.status_code, detail={"code": exc.code, "message": str(exc)}) from exc
+            detail = {"code": exc.code, "message": str(exc)}
+            if getattr(exc, "diagnostic_id", None):
+                detail["diagnostic_id"] = exc.diagnostic_id
+            raise HTTPException(exc.status_code, detail=detail) from None
 
 
 @router.post("/parse-text")

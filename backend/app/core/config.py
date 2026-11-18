@@ -6,6 +6,7 @@ from pydantic import AnyHttpUrl, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.schemas.matching import MatchingWeights
+from app.schemas.readiness import ReadinessWeights
 
 
 class Settings(BaseSettings):
@@ -18,7 +19,9 @@ class Settings(BaseSettings):
     isolate_parsing: bool = False
     parser_timeout_seconds: int = Field(default=25, ge=1, le=60)
     parser_memory_mb: int = Field(default=384, ge=128, le=1024)
-    app_mode: Literal["single_user", "local"] = "single_user"
+    app_mode: Literal["anonymous", "single_user", "local"] = "anonymous"
+    anonymous_requests_per_minute: int = Field(default=30, ge=1, le=300)
+    anonymous_global_requests_per_minute: int = Field(default=120, ge=1, le=1200)
     single_user_api_key: SecretStr | None = None
     single_user_id: str = Field(default="primary", min_length=1, max_length=64, pattern=r"^[A-Za-z0-9_-]+$")
     cors_origins: list[AnyHttpUrl] = [AnyHttpUrl("http://localhost:5173")]
@@ -30,6 +33,7 @@ class Settings(BaseSettings):
     spacy_model: str = "en_core_web_sm"
     require_ner_model: bool = False
     matching_weights: MatchingWeights = Field(default_factory=MatchingWeights)
+    readiness_weights: ReadinessWeights = Field(default_factory=ReadinessWeights)
     storage_enabled: bool = False
     database_url: SecretStr | None = None
     retention_days: int = Field(default=7, ge=1, le=365)
@@ -44,14 +48,18 @@ class Settings(BaseSettings):
         key = self.single_user_api_key.get_secret_value() if self.single_user_api_key else ""
         if key and (len(key) < 32 or key.lower().startswith(("replace", "change", "example"))):
             raise ValueError("SINGLE_USER_API_KEY must be a non-placeholder random token of at least 32 characters.")
+        if key and (not key.isascii() or any(c.isspace() or ord(c) < 33 or ord(c) > 126 for c in key)):
+            raise ValueError("SINGLE_USER_API_KEY must use printable ASCII characters without whitespace.")
         signing = self.report_signing_key.get_secret_value() if self.report_signing_key else ""
         if signing and (len(signing) < 32 or signing.lower().startswith(("replace", "change", "example"))):
             raise ValueError("REPORT_SIGNING_KEY must be a non-placeholder random secret of at least 32 characters.")
         if self.deployment_environment == "production":
-            if self.app_mode != "single_user" or not key or not signing or not self.require_ner_model or not self.isolate_parsing:
-                raise ValueError("Production requires single-user authentication, report signing, the NER model and isolated parsing.")
+            if self.app_mode == "local" or (self.app_mode == "single_user" and not key) or not signing or not self.require_ner_model or not self.isolate_parsing:
+                raise ValueError("Production requires report signing, the NER model, isolated parsing and authentication when single_user mode is selected.")
             if not self.cors_origins or any(o.scheme != "https" for o in self.cors_origins):
                 raise ValueError("Production CORS requires explicit HTTPS frontend origins.")
+        if self.app_mode == "anonymous" and self.storage_enabled:
+            raise ValueError("Anonymous mode requires STORAGE_ENABLED=false; private history cannot be exposed.")
         if self.storage_enabled and (not key or not self.database_url or not self.database_url.get_secret_value()):
             raise ValueError("Persistent storage requires DATABASE_URL and SINGLE_USER_API_KEY.")
         if not self.allowed_hosts or any(not host or "*" in host or "/" in host or host != host.strip() for host in self.allowed_hosts):

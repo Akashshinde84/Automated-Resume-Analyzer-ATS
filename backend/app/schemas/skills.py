@@ -61,7 +61,7 @@ class SkillSpan(BaseModel):
     start: int = Field(ge=0)
     end: int = Field(gt=0)
     alias: str
-    section: Literal["unclassified", "contact", "summary", "skills", "education", "experience", "projects", "certifications"]
+    section: Literal["unclassified", "contact", "summary", "skills", "education", "experience", "projects", "certifications", "activities", "other"]
     source_type: Literal["explicit", "experience", "project", "other"]
     context_rule: ContextRule | None = None
 

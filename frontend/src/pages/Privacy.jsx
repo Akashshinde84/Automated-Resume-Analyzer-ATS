@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useWorkspace } from '../context/Workspace'
 import { Icon, PageHeading } from '../components/UI'
 export function Privacy() {
@@ -14,8 +13,8 @@ export function Privacy() {
         {[
           [
             'shield',
-            'Private access',
-            'The API requires the backend owner’s access token. This first deployment is a single-user workspace, not a public candidate portal. Your token is held in this tab’s memory, never in browser storage or build-time variables.',
+            'No account required',
+            'Resume analysis, matching and downloads work without login. Results remain in tab memory; closing, clearing or reloading removes them. No analytics receive resume content.',
           ],
           [
             'document',
@@ -24,8 +23,8 @@ export function Privacy() {
           ],
           [
             'clock',
-            'Optional saved history',
-            'Saving is available only when the authenticated backend confirms persistence is enabled. You must opt in separately for an analysis and a match. Saved records include extracted personal information; saved matches also include the job description. The backend controls retention, and saved records show their expiration.',
+            'History is disabled',
+            'Anonymous requests cannot save, list, read or delete database records. Existing private records remain inaccessible. Processing creates no persistent resume history.',
           ],
         ].map(([icon, title, text]) => (
           <article className="card privacy-card" key={title}>
@@ -40,30 +39,14 @@ export function Privacy() {
       <section className="card privacy-detail">
         <h2>Clear or delete your data</h2>
         <p>
-          <strong>Clear this tab:</strong> Disconnect to abort pending requests
-          and remove the token, current resume, job description, and match
-          results from application memory. Closing or reloading the tab also
-          starts a fresh session. This does not delete saved records.
-        </p>
-        <p>
-          <strong>Delete saved records:</strong> Open saved history, select
-          Delete, and confirm. The backend removes the analysis and its related
-          structured data, job descriptions, and matches together. Hosting
-          providers and database backups may have their own retention policies;
-          contact the deployment owner about those.
+          <strong>Clear this tab:</strong> Clear current analysis aborts pending
+          requests and removes the current resume, job description and matching
+          results from memory. Reloading also starts fresh.
         </p>
         <div className="inline-actions">
-          {workspace.token && (
-            <button className="button secondary" onClick={workspace.disconnect}>
-              Disconnect & clear session
-            </button>
-          )}
-          {workspace.historyAvailable && (
-            <Link className="button primary" to="/history">
-              Manage saved history
-              <Icon name="arrow" />
-            </Link>
-          )}
+          <button className="button secondary" onClick={workspace.clear}>
+            Clear current analysis
+          </button>
         </div>
         <hr />
         <h2>Downloaded reports</h2>

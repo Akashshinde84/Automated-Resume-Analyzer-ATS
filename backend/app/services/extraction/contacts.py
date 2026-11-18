@@ -6,9 +6,9 @@ import phonenumbers
 
 from app.schemas.candidate import Evidence, PhoneNumber
 from app.services.extraction.dates import RANGE
+from app.services.document_links import URL, visible_urls
 
 EMAIL = re.compile(r"[\w.!#$%&'*+/=?^`{|}~-]+@(?:[\w-]+\.)+[\w-]{2,63}", re.UNICODE)
-URL = re.compile(r"(?<![@\w])(?:https?://[^\s<>\"]+|(?:www\.)?(?:linkedin\.com|github\.com)/[^\s<>\"]+|(?:[\w-]+\.)+[a-zA-Z]{2,24}(?:/[^\s<>\"]*)?)", re.I)
 PHONE = re.compile(r"\+?\d[\d ().-]{5,}\d(?:\s*(?:ext\.?|x)\s*\d+)?", re.I)
 PHONE_LABEL = re.compile(r"\b(?:phone|mobile|tel(?:ephone)?|cell|contact number)\s*[:.]?\s*", re.I)
 
@@ -18,23 +18,7 @@ def evidence(field, method, rule, source, confidence="medium"):
 
 
 def urls(text: str) -> list[str]:
-    result = []
-    for match in URL.finditer(text):
-        # Email domains are not portfolio links.
-        if match.start() and text[match.start() - 1] == "@":
-            continue
-        raw = match.group().rstrip(".,;:!?)\u3002]")
-        value = raw if "://" in raw else "https://" + raw
-        try:
-            parsed = urlsplit(value)
-            if not parsed.hostname or parsed.username or parsed.password or parsed.scheme not in {"http", "https"}:
-                continue
-            value = urlunsplit((parsed.scheme.lower(), parsed.netloc.lower(), parsed.path, parsed.query, ""))
-        except ValueError:
-            continue
-        if value not in result:
-            result.append(value)
-    return result
+    return visible_urls(text)
 
 
 def extract_contacts(text: str, region: str | None):

@@ -10,76 +10,78 @@ export function Upload() {
   const [file, setFile] = useState(null),
     [error, setError] = useState(null),
     [busy, setBusy] = useState(false),
-    [progress, setProgress] = useState(null),
+    [progress, setProgress] = useState(0),
+    [phase, setPhase] = useState('uploading'),
     [drag, setDrag] = useState(false),
-    [store, setStore] = useState(false),
     [region, setRegion] = useState('')
   const input = useRef(null),
     active = useRef(null)
   useEffect(() => () => active.current?.abort(), [])
   function select(files) {
-    if (busy) return
+    if (active.current) return
     const failure =
       files.length !== 1
         ? 'Choose one resume at a time.'
         : validateFile(files[0])
     setError(failure)
     setFile(failure ? null : files[0])
+    if (!failure) analyze(files[0])
   }
-  async function submit(event) {
-    event.preventDefault()
-    const failure = validateFile(file)
-    if (failure) {
-      setError(failure)
-      return
-    }
-    if (!workspace.token) {
-      workspace.setSessionOpen(true)
+  async function analyze(selected) {
+    if (active.current) return
+    const failure = validateFile(selected)
+    if (failure || (region && !/^[A-Za-z]{2}$/.test(region))) {
+      setError(failure || 'Use a two-letter phone region or leave it blank.')
       return
     }
     setBusy(true)
     setError(null)
     setProgress(0)
+    setPhase('uploading')
     const control = workspace.controller()
     active.current = control
     try {
-      const result = await uploadResume(file, workspace.token, {
-        store: store && workspace.historyAvailable,
+      const result = await uploadResume(selected, {
         region,
-        onProgress: setProgress,
         signal: control.signal,
+        onProgress: (value) => {
+          setProgress(value)
+          if (value === 100) setPhase('processing')
+        },
       })
       if (!control.signal.aborted) {
-        workspace.acceptAnalysis(result)
-        navigate('/analysis')
+        setPhase('results')
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        if (!control.signal.aborted) {
+          workspace.acceptAnalysis(result)
+          navigate('/analysis')
+        }
       }
     } catch (failure) {
       if (failure.name !== 'AbortError') setError(failure)
     } finally {
       workspace.release(control)
+      active.current = null
       setBusy(false)
     }
   }
   return (
     <>
       <PageHeading
-        eyebrow="STEP 01 / YOUR EXPERIENCE"
-        title="Start with your resume"
-        description="A document is all you need. We’ll organize the details so you can review them."
+        eyebrow="YOUR NEXT OPPORTUNITY STARTS HERE"
+        title="AI Resume Analyzer"
+        description="Upload your resume and get instant AI-powered insights."
       />
       <div className="upload-layout">
-        <form className="card upload-card" onSubmit={submit}>
+        <section className="card upload-card" aria-labelledby="upload-title">
           <div className="card-heading">
-            <h2>Upload a resume</h2>
-            <span className="badge">PDF or DOCX</span>
+            <h2 id="upload-title">Upload a resume</h2>
+            <span className="badge">PDF and DOCX</span>
           </div>
+          <p className="muted">
+            Choose a file to start analysis automatically. No account required.
+          </p>
           <ErrorNotice error={error} />
-          {error?.status === 0 && store && (
-            <p className="notice warning">
-              The request may have completed on the server. Check private
-              history before retrying to avoid saving a duplicate analysis.
-            </p>
-          )}
           <div
             className={`dropzone ${drag ? 'dragging' : ''}`}
             onDragOver={(event) => {
@@ -99,7 +101,7 @@ export function Upload() {
             <h3>{file ? file.name : 'Drop your resume here'}</h3>
             <p>
               {file
-                ? `${(file.size / 1024).toFixed(1)} KB · Ready to analyze`
+                ? `${(file.size / 1024).toFixed(1)} KB`
                 : 'or choose a file from your device'}
             </p>
             <input
@@ -121,9 +123,11 @@ export function Upload() {
               disabled={busy}
               onClick={() => input.current.click()}
             >
-              {file ? 'Change file' : 'Browse files'}
+              {file ? 'Choose another file' : 'Browse files'}
             </button>
-            <small>PDF or DOCX · Up to {MAX_FILE_BYTES / 1024 / 1024} MB</small>
+            <small>
+              PDF and DOCX / Up to {MAX_FILE_BYTES / 1024 / 1024} MB
+            </small>
           </div>
           <div className="field">
             <label htmlFor="region">
@@ -134,55 +138,41 @@ export function Upload() {
               className="region-input"
               placeholder="e.g. GB"
               maxLength={2}
-              pattern="[A-Za-z]{2}"
               value={region}
               onChange={(event) => setRegion(event.target.value)}
               disabled={busy}
               aria-describedby="region-help"
             />
             <small id="region-help">
-              Two-letter country code for local phone numbers. No country is
+              Set before uploading for local phone numbers. No country is
               assumed.
             </small>
           </div>
-          {workspace.historyAvailable && (
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={store}
-                onChange={(event) => setStore(event.target.checked)}
-                disabled={busy}
-              />
-              <span>
-                Save this analysis to private history
-                <small>
-                  Includes extracted personal information. You can delete it
-                  later.
-                </small>
-              </span>
-            </label>
-          )}
           {busy && (
             <div className="processing" role="status" aria-live="polite">
               <span className="spinner" />
               <div>
                 <strong>
-                  {progress !== null && progress < 100
-                    ? `Uploading… ${progress}%`
-                    : 'Analyzing your resume…'}
+                  {phase === 'results'
+                    ? 'Generating Results'
+                    : phase === 'processing'
+                      ? 'Extracting Text / Analyzing Skills'
+                      : `Uploading${progress === null ? '' : ` ${progress}%`}`}
                 </strong>
                 <p>
-                  {progress === 100
-                    ? 'Extracting text, candidate details, and skills. Please keep this tab open.'
-                    : 'Sending your file securely to the configured backend.'}
+                  Uploading ? Extracting Text ? Analyzing Skills ? Generating
+                  Results
                 </p>
+                <small>
+                  Text extraction and skill analysis run together. Please keep
+                  this tab open.
+                </small>
               </div>
             </div>
           )}
           <div className="form-footer">
             <span>
-              <Icon name="shield" size={16} />
-              Original files are not retained
+              <Icon name="shield" size={16} /> Original files are not retained
             </span>
             {busy ? (
               <button
@@ -192,30 +182,31 @@ export function Upload() {
               >
                 Cancel
               </button>
-            ) : (
-              <button className="button primary" disabled={!file}>
-                {workspace.token ? 'Analyze resume' : 'Connect to analyze'}
-                <Icon name="arrow" />
+            ) : error && file ? (
+              <button
+                type="button"
+                className="button primary"
+                onClick={() => analyze(file)}
+              >
+                Retry Analysis
               </button>
-            )}
+            ) : null}
           </div>
-        </form>
+        </section>
         <aside className="upload-aside">
           <div className="card guidance-card">
-            <p className="eyebrow">A BETTER EXTRACTION</p>
-            <h2>Keep it readable.</h2>
+            <p className="eyebrow">CLEAR EVIDENCE, USEFUL INSIGHTS</p>
+            <h2>Your experience, understood.</h2>
             <ul className="check-list">
               <li>
-                <Icon name="check" />
-                Use a text-based PDF or DOCX.
+                <Icon name="check" /> Candidate details and career history
               </li>
               <li>
-                <Icon name="check" />
-                Include clear section headings.
+                <Icon name="check" /> Skills with supporting evidence
               </li>
               <li>
-                <Icon name="check" />
-                Review uncertain or missing details.
+                <Icon name="check" /> Optional job matching and downloadable
+                reports
               </li>
             </ul>
             <div className="notice quiet">
@@ -227,8 +218,8 @@ export function Upload() {
             </div>
           </div>
           <p className="aside-note">
-            The server checks file signatures and enforces its own size limit.
-            Client checks help you catch problems sooner.
+            Results stay in this tab. No saved history. Review extracted details
+            against your original resume.
           </p>
         </aside>
       </div>

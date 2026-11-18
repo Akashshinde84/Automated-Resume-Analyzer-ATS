@@ -66,12 +66,23 @@ class Suggestion(BaseModel):
     skill: str
     message: str
     resume_evidence: list[Evidence] = Field(default_factory=list)
+    priority: Literal["high", "medium", "low"] = "medium"
+    problem: str | None = None
+    why: str | None = None
+    section: str = "skills / projects / experience"
 
 
 class MatchingScores(BaseModel):
     skill_overlap: float | None = Field(default=None, ge=0, le=100)
     text_similarity: float | None = Field(default=None, ge=0, le=100)
     overall: float | None = Field(default=None, ge=0, le=100)
+
+
+class SupportingRecord(BaseModel):
+    section: Literal["projects", "experience"]
+    name: str | None = None
+    skills: list[str]
+    evidence: list[Evidence]
 
 
 class MatchingResponse(BaseModel):
@@ -91,3 +102,4 @@ class MatchingResponse(BaseModel):
     shared_text_features: list[FeatureContribution]
     warnings: list[str]
     method: str = "Pair-local binary TF-IDF and cosine over canonical skill and allowlisted task tokens; no embeddings or custom-trained predictor."
+    supporting_records: list[SupportingRecord] = Field(default_factory=list)

@@ -65,7 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 database.dispose()
 
     application = FastAPI(title=settings.app_name, version="0.8.0", lifespan=lifespan,
-        description="Single-user resume analysis. All v1 APIs require the deployment bearer token by default. Storage is disabled unless configured and explicitly requested.")
+        description="Anonymous stateless resume analysis, matching and signed snapshot reports. Stored history is inaccessible in anonymous mode. Legacy single-user mode retains owner authentication.")
     application.state.settings = settings
     application.state.database = None
 
@@ -97,7 +97,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                                allow_credentials=False, allow_methods=["GET", "POST", "DELETE"], allow_headers=["Content-Type", "Authorization"])
     application.include_router(health_router)
     for router in (resumes_router, extraction_router, matching_router, analyses_router, reports_router):
-        application.include_router(router, dependencies=[Depends(api_access)])
+        application.include_router(router, dependencies=[] if settings.app_mode == "anonymous" else [Depends(api_access)])
     return application
 
 

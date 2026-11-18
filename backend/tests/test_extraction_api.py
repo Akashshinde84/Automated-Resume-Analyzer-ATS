@@ -51,7 +51,11 @@ def test_extractor_failure_is_private(client, monkeypatch, caplog):
         raise RuntimeError("PRIVATE jordan@example.test")
     monkeypatch.setattr(InformationExtractor, "extract", fail)
     response = client.post(URL, json={"text": "PRIVATE jordan@example.test"})
-    assert response.status_code == 503
+    assert response.status_code == 500
+    detail = response.json()["detail"]
+    assert detail["code"] == "extraction_failed"
+    assert detail["diagnostic_id"] in caplog.text
+    assert "stage=candidate_extraction exception_type=RuntimeError" in caplog.text
     assert "PRIVATE" not in response.text + caplog.text
     assert "jordan@example.test" not in response.text + caplog.text
 

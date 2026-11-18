@@ -7,9 +7,11 @@ HEADINGS = {
     "summary": ("summary", "professional summary", "profile", "professional profile", "objective", "career objective"),
     "skills": ("skills", "technical skills", "core competencies", "key skills", "skills and expertise"),
     "education": ("education", "academic background", "academic qualifications", "educational qualifications"),
-    "experience": ("experience", "work experience", "work history", "employment history", "professional experience"),
+    "experience": ("experience", "work experience", "work history", "employment history", "professional experience", "internships", "internship experience", "employment", "career history"),
     "projects": ("projects", "personal projects", "academic projects", "selected projects"),
     "certifications": ("certifications", "certificates", "licenses and certifications", "certifications and licenses"),
+    "activities": ("extra curricular activities", "extracurricular activities", "extra-curricular activities", "activities", "co curricular activities", "co-curricular activities", "leadership and activities", "sports and achievements"),
+    "other": ("references", "interests", "hobbies", "languages", "awards", "achievements", "declaration", "publications", "volunteering"),
 }
 ALIASES = {alias: section for section, aliases in HEADINGS.items() for alias in aliases}
 
@@ -17,6 +19,10 @@ ALIASES = {alias: section for section, aliases in HEADINGS.items() for alias in 
 def heading_section(line: str) -> str | None:
     heading = line.partition(":")[0]
     key = re.sub(r"\s+", " ", heading.strip(" -–—|\t")).casefold()
+    key = re.sub(r"^\d+[.)]\s+", "", key)
+    if re.fullmatch(r"(?:[a-z]\s+){3,}[a-z]", key):
+        key = key.replace(" ", "")
+    key = re.sub(r"\s*&\s*", " and ", key)
     return ALIASES.get(key)
 
 

@@ -203,7 +203,11 @@ def test_model_inference_failure_private(client, docx_bytes, monkeypatch, caplog
         raise RuntimeError('PRIVATE jose@example.test')
     monkeypatch.setattr(InformationExtractor, 'extract', fail)
     response = analyze(client, docx_bytes)
-    assert response.status_code == 503
+    assert response.status_code == 500
+    detail = response.json()['detail']
+    assert detail['code'] == 'extraction_failed'
+    assert detail['diagnostic_id'] in caplog.text
+    assert 'stage=candidate_extraction exception_type=RuntimeError' in caplog.text
     assert 'PRIVATE' not in response.text + caplog.text
     assert counts(client) == [0,0,0,0]
 

@@ -42,7 +42,7 @@ def test_stateless_json_pdf_full_flow(docx_bytes):
         pdf = client.post("/api/v1/reports", json={**payload, "format": "pdf"})
         assert pdf.status_code == 200 and pdf.content.startswith(b"%PDF-")
         text = extract_text(BytesIO(pdf.content))
-        for expected in ("Resume analysis report", "Overall estimate", "Python", "Missing required skills", "Evidence-based next steps", "PRIVATE", "Page 1", "Unicode codepoints"):
+        for expected in ("Resume analysis report", "Job Match Score", "ATS readiness", "Python", "Missing required skills", "Evidence-based next steps", "PRIVATE", "Page 1", "Unicode codepoints"):
             assert expected in text
         assert "[U+674E]" in text and "[U+660E]" in text
         assert pdf.headers["content-type"] == "application/pdf"
@@ -139,7 +139,7 @@ def test_analysis_only_empty_pdf_and_safe_failure(client, make_pdf, monkeypatch)
     result = client.post("/api/v1/reports", json=payload).json()
     assert result["match"] is None and result["analysis"]["parsed"]["warnings"]
     pdf = client.post("/api/v1/reports", json={**payload, "format": "pdf"})
-    assert "No score has been generated" in extract_text(BytesIO(pdf.content))
+    assert "Job Match Score is unavailable" in extract_text(BytesIO(pdf.content))
     def failure(*args):
         raise RuntimeError("Sensitive internal content should not be exposed")
     monkeypatch.setattr(PDFReport, "render", failure)

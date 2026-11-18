@@ -10,7 +10,6 @@ import { Upload } from './pages/Upload'
 import { Analysis } from './pages/Analysis'
 import { Job } from './pages/Job'
 import { Match } from './pages/Match'
-import { History } from './pages/History'
 import { Privacy } from './pages/Privacy'
 import './styles.css'
 
@@ -21,12 +20,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <WorkspaceProvider>
           <Routes>
             <Route element={<Shell />}>
-              <Route index element={<Home />} />
+              <Route index element={<Upload />} />
+              <Route path="about" element={<Home />} />
               <Route path="upload" element={<Upload />} />
               <Route path="analysis" element={<Analysis />} />
               <Route path="job" element={<Job />} />
               <Route path="match" element={<Match />} />
-              <Route path="history" element={<History />} />
+
               <Route path="privacy" element={<Privacy />} />
               <Route
                 path="*"

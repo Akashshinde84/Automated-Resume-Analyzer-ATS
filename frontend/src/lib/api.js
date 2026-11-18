@@ -18,7 +18,7 @@ export class ApiError extends Error {
 }
 export function responseError(data, status) {
   const detail = data?.detail
-  return new ApiError(
+  const error = new ApiError(
     typeof detail?.message === 'string'
       ? detail.message
       : status === 422
@@ -27,6 +27,9 @@ export function responseError(data, status) {
     status,
     detail?.code,
   )
+  if (/^[a-f0-9]{12}$/.test(detail?.diagnostic_id || ''))
+    error.diagnosticId = detail.diagnostic_id
+  return error
 }
 export function validateFile(file) {
   if (!file) return 'Choose a PDF or DOCX resume.'
@@ -57,7 +60,6 @@ export function scoreLabel(value) {
 
 export async function request(
   path,
-  token,
   { body, method = 'GET', signal, download } = {},
 ) {
   let response
@@ -69,7 +71,6 @@ export async function request(
       credentials: 'omit',
       redirect: 'error',
       headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(body ? { 'Content-Type': 'application/json' } : {}),
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
@@ -96,15 +97,20 @@ export async function request(
 }
 
 export function reportPayload(analysis, match, format) {
-  const source = analysis.id
-    ? { analysis_id: analysis.id }
-    : { snapshot: analysis }
+  if (analysis.id || analysis.stored)
+    throw new ApiError(
+      'Saved analyses are unavailable here. Upload your resume again.',
+    )
+  const source = { snapshot: analysis }
   if (!match) return { ...source, format }
   if (match.analysis_id !== analysis.id)
     throw new ApiError(
       'This comparison belongs to another analysis. Compare the current resume again.',
     )
-  if (match.stored && match.id) return { ...source, match_id: match.id, format }
+  if (match.stored || match.id)
+    throw new ApiError(
+      'Saved comparisons are unavailable here. Compare your current resume again.',
+    )
   return {
     ...source,
     match: {
@@ -130,18 +136,10 @@ export function saveDownload(blob, format) {
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
-export function uploadResume(
-  file,
-  token,
-  { store, region, onProgress, signal },
-) {
+export function uploadResume(file, { region, onProgress, signal }) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open(
-      'POST',
-      `${API_BASE}/api/v1/resumes/analyze?store=${Boolean(store)}`,
-    )
-    xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+    xhr.open('POST', `${API_BASE}/api/v1/resumes/analyze?store=false`)
     xhr.timeout = 180000
     xhr.upload.onprogress = (event) =>
       onProgress(
@@ -149,6 +147,7 @@ export function uploadResume(
           ? Math.round((event.loaded / event.total) * 100)
           : null,
       )
+    xhr.upload.onload = () => onProgress(100)
     const abort = () => xhr.abort()
     signal?.addEventListener('abort', abort, { once: true })
     xhr.onloadend = () => signal?.removeEventListener('abort', abort)

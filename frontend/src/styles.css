@@ -2095,3 +2095,167 @@ textarea::placeholder {
 .quiet {
   color: #35685d;
 }
+
+/* Transparent readiness analysis; reuses the dashboard's existing visual system. */
+.readiness {
+  margin: 24px 0;
+  display: grid;
+  gap: 22px;
+}
+.readiness-overview {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(320px, 1.6fr);
+  gap: 22px;
+}
+.readiness-summary,
+.readiness-breakdown,
+.readiness-strengths,
+.readiness-improvements {
+  padding: 28px;
+  min-width: 0;
+}
+.readiness-summary {
+  background: linear-gradient(155deg, #effaf5, #fff 75%);
+  text-align: center;
+}
+.readiness-summary h2 {
+  font-size: 25px;
+}
+.readiness-ring {
+  margin: 24px auto;
+}
+.rubric-category {
+  border-bottom: 1px solid #dfe8e5;
+  padding: 13px 0;
+}
+.rubric-category summary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 9px 16px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.rubric-category summary strong {
+  color: #086f66;
+  white-space: nowrap;
+}
+.rubric-category progress {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 7px;
+  border: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  accent-color: #087f75;
+  background: #edf2ef;
+}
+.rubric-category progress::-webkit-progress-bar {
+  background: #edf2ef;
+}
+.rubric-category progress::-webkit-progress-value {
+  background: #087f75;
+  border-radius: 8px;
+}
+.rubric-check {
+  padding: 12px 8px;
+  font-size: 12px;
+}
+.rubric-check p {
+  margin: 6px 0;
+  color: #5e7280;
+}
+.rubric-check blockquote {
+  margin: 8px 0;
+  padding-left: 12px;
+  border-left: 2px solid #b8d9cf;
+  overflow-wrap: anywhere;
+}
+.strength-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 30px;
+  padding-left: 20px;
+  color: #236459;
+  font-size: 13px;
+}
+.readiness-improvements > select {
+  width: auto;
+  min-width: 180px;
+  margin: 8px 0 12px;
+}
+.readiness-improvements > label {
+  display: block;
+  font-size: 12px;
+}
+.improvement-item {
+  border-top: 1px solid #e1ebe6;
+  padding: 20px 0;
+}
+.improvement-item:last-child {
+  padding-bottom: 0;
+}
+.improvement-item h3 {
+  margin: 12px 0 8px;
+  font-size: 15px;
+}
+.improvement-item p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.improvement-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: #5e7280;
+}
+.priority {
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.priority-high {
+  background: #fff0ed;
+  color: #9b342a;
+}
+.priority-medium {
+  background: #fff6df;
+  color: #805b13;
+}
+.priority-low {
+  background: #eaf5f0;
+  color: #236459;
+}
+.potential-points {
+  display: block;
+  color: #086f66;
+  line-height: 1.6;
+}
+.project-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0;
+}
+.project-actions .button {
+  font-size: 11px;
+}
+.supporting-records {
+  margin-bottom: 24px;
+}
+@media (max-width: 760px) {
+  .readiness-overview {
+    grid-template-columns: 1fr;
+  }
+  .readiness-summary,
+  .readiness-breakdown,
+  .readiness-strengths,
+  .readiness-improvements {
+    padding: 22px;
+  }
+  .strength-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -8,7 +8,6 @@ import json
 from contextlib import contextmanager
 import os
 from pathlib import Path
-import secrets
 import shutil
 import socket
 import subprocess
@@ -59,15 +58,26 @@ def fixtures(directory):
     lines = ["Name: Sofía Rivera", "sofia@example.test", "Summary", "Builds reliable APIs.",
              "Technical Skills", "Python, SQL, React", "Professional Experience", "Software Engineer at Example Labs",
              "Jan 2022 - Present", "Built Python APIs and SQL data pipelines.", "Education", "Example University",
-             "Bachelor of Science in Computer Science", "2017 - 2021", "Projects", "Resume Platform", "Built a React dashboard."]
+             "Bachelor of Science in Computer Science", "2017 - 2021", "Projects", "Resume Platform", "Built a React dashboard.", "[GitHub]"]
     document = Document()
     for line in lines:
-        document.add_paragraph(line)
+        paragraph = document.add_paragraph(line)
+        if line == '[GitHub]':
+            from docx.oxml import OxmlElement
+            from docx.oxml.ns import qn
+            from docx.opc.constants import RELATIONSHIP_TYPE
+            paragraph.clear()
+            relation = paragraph.part.relate_to('https://github.com/example/resume-platform', RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+            link = OxmlElement('w:hyperlink'); link.set(qn('r:id'), relation)
+            run = OxmlElement('w:r'); label = OxmlElement('w:t'); label.text = '[GitHub]'
+            run.append(label); link.append(run); paragraph._p.append(link)
     document.save(directory / "synthetic.docx")
     pdf = canvas.Canvas(str(directory / "synthetic.pdf"))
     y = 800
     for line in lines:
         pdf.drawString(48, y, line.replace("í", "i"))
+        if line == '[GitHub]':
+            pdf.linkURL('https://github.com/example/resume-platform', (48, y-2, 110, y+12), relative=0)
         y -= 23
     pdf.save()
     image = Image.new("RGB", (200, 200), "white")
@@ -96,20 +106,22 @@ def main():
             ui_port = port()
         base = f"http://127.0.0.1:{ui_port}"
         api = f"http://127.0.0.1:{api_port}"
-        environment = {**os.environ, "APP_MODE": "single_user", "SINGLE_USER_API_KEY": secrets.token_urlsafe(48),
-            "SINGLE_USER_ID": "phase8-test-owner", "STORAGE_ENABLED": "true", "DATABASE_URL": url,
-            "REQUIRE_NER_MODEL": "false", "SPACY_MODEL": "en_core_web_sm", "RETENTION_DAYS": "7",
+        environment = {**os.environ, "APP_MODE": "anonymous", "DEPLOYMENT_ENVIRONMENT": "development",
+            "SINGLE_USER_ID": "phase8-test-owner", "STORAGE_ENABLED": "false", "DATABASE_URL": url,
+            "REQUIRE_NER_MODEL": "true", "ISOLATE_PARSING": "true", "ANONYMOUS_REQUESTS_PER_MINUTE": "300", "ANONYMOUS_GLOBAL_REQUESTS_PER_MINUTE": "1200", "SPACY_MODEL": "en_core_web_sm", "RETENTION_DAYS": "7",
             "ALLOWED_HOSTS": '["localhost","127.0.0.1"]', "CORS_ORIGINS": json.dumps([base]),
             "VITE_API_BASE_URL": api, "VITE_MAX_UPLOAD_MB": "10", "E2E_BASE_URL": base,
             "E2E_FILES_DIR": str(directory), "E2E_OUTPUT_DIR": str(output), "NO_COLOR": "1"}
-        environment["E2E_OWNER_TOKEN"] = environment["SINGLE_USER_API_KEY"]
         processes = []
         flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
         try:
-            processes.append(subprocess.Popen([sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(api_port), "--no-access-log"],
-                cwd=BACKEND, env=environment, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=flags))
-            processes.append(subprocess.Popen([node, "node_modules/vite/bin/vite.js", "--host", "127.0.0.1", "--port", str(ui_port), "--strictPort"],
-                cwd=frontend, env=environment, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=flags))
+            output.mkdir(parents=True, exist_ok=True)
+            with (output / 'backend-startup.log').open('w', encoding='utf-8') as log:
+                processes.append(subprocess.Popen([sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(api_port), "--no-access-log"],
+                    cwd=BACKEND, env=environment, stdout=log, stderr=subprocess.STDOUT, creationflags=flags))
+            with (output / 'frontend-startup.log').open('w', encoding='utf-8') as log:
+                processes.append(subprocess.Popen([node, "node_modules/vite/bin/vite.js", "--host", "127.0.0.1", "--port", str(ui_port), "--strictPort"],
+                    cwd=frontend, env=environment, stdout=log, stderr=subprocess.STDOUT, creationflags=flags))
             deadline = time.monotonic() + 45
             with httpx.Client(timeout=2) as client:
                 while True:

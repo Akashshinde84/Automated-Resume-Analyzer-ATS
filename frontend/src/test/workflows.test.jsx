@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
@@ -54,10 +54,9 @@ function Seed({ value, result }) {
       >
         Load fixture
       </button>
-      <button onClick={workspace.disconnect}>Disconnect</button>
+      <button onClick={workspace.clear}>Clear</button>
       <span data-testid="session-state">
         {workspace.analysis ? 'loaded' : 'empty'}:
-        {workspace.token ? 'connected' : 'disconnected'}
       </span>
     </>
   )
@@ -86,10 +85,8 @@ describe('resume review', () => {
     expect(
       screen.getByRole('link', { name: /Try another resume/ }),
     ).toHaveAttribute('href', '/upload')
-    await userEvent.click(screen.getByText('Disconnect'))
-    expect(screen.getByTestId('session-state')).toHaveTextContent(
-      'empty:disconnected',
-    )
+    await userEvent.click(screen.getByText('Clear'))
+    expect(screen.getByTestId('session-state')).toHaveTextContent('empty:')
   })
   it('rejects unsupported drag-and-drop files', () => {
     render(
@@ -102,9 +99,7 @@ describe('resume review', () => {
       { dataTransfer: { files: [new File(['x'], 'resume.exe')] } },
     )
     expect(screen.getByRole('alert')).toHaveTextContent('Only PDF and DOCX')
-    expect(
-      screen.getByRole('button', { name: /Connect to analyze/ }),
-    ).toBeDisabled()
+    expect(screen.queryByText('Connect to analyze')).not.toBeInTheDocument()
   })
 })
 describe('matching results', () => {
@@ -150,41 +145,73 @@ describe('matching results', () => {
     expect(screen.getByText(/Review the requirement/)).toBeInTheDocument()
   })
 })
-function ConnectionFixture() {
-  const workspace = useWorkspace()
-  return (
-    <>
-      <button
-        onClick={() =>
-          workspace.connect('synthetic-token', new AbortController().signal)
-        }
-      >
-        Connect
-      </button>
-      <button onClick={workspace.disconnect}>Disconnect</button>
-      <span>{workspace.token ? 'Connected' : 'Offline'}</span>
-      <span>
-        {workspace.historyAvailable ? 'History enabled' : 'Stateless'}
-      </span>
-    </>
-  )
-}
-it('accepts authenticated stateless mode and never persists tokens', async () => {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue({
-    status: 409,
-    ok: false,
-    json: async () => ({ detail: { code: 'storage_disabled' } }),
-  })
+it('keeps analysis only in memory and clears it without a login step', async () => {
   const storage = vi.spyOn(Storage.prototype, 'setItem')
   render(
     <Harness>
-      <ConnectionFixture />
+      <Seed value={analysis} />
     </Harness>,
   )
-  await userEvent.click(screen.getByRole('button', { name: 'Connect' }))
-  await waitFor(() => expect(screen.getByText('Connected')).toBeInTheDocument())
-  expect(screen.getByText('Stateless')).toBeInTheDocument()
+  await userEvent.click(screen.getByText('Load fixture'))
+  expect(screen.getByTestId('session-state')).toHaveTextContent('loaded')
   expect(storage).not.toHaveBeenCalled()
-  await userEvent.click(screen.getByRole('button', { name: 'Disconnect' }))
-  expect(screen.getByText('Offline')).toBeInTheDocument()
+  await userEvent.click(screen.getByText('Clear'))
+  expect(screen.getByTestId('session-state')).toHaveTextContent('empty')
+})
+
+it('renders grouped education, technologies, links and separate activities', async () => {
+  const value = {
+    ...analysis,
+    extraction: {
+      ...analysis.extraction,
+      candidate: {
+        ...candidate,
+        summary: 'Builds document tools.',
+        education: [
+          {
+            institution: 'Example Institute',
+            degree: 'B.Tech',
+            field: 'AI & ML',
+            grade: 'CGPA: 8.4/10',
+            raw_text: 'Example Institute',
+            provenance: [],
+            warnings: [],
+          },
+        ],
+        projects: [
+          {
+            name: 'Document Tool',
+            technologies: ['Python', 'React'],
+            urls: ['https://github.com/example/tool'],
+            description: 'Built a parser using Python.',
+            raw_text: 'Document Tool',
+            provenance: [],
+            warnings: [],
+          },
+        ],
+        activities: [
+          {
+            name: 'Sports',
+            description: 'Organized a football event.',
+            raw_text: 'Football',
+            provenance: [],
+            warnings: [],
+          },
+        ],
+      },
+    },
+  }
+  render(
+    <Harness>
+      <Seed value={value} />
+      <Analysis />
+    </Harness>,
+  )
+  await userEvent.click(screen.getByText('Load fixture'))
+  expect(screen.getByText('Technologies: Python, React')).toBeInTheDocument()
+  expect(screen.getByText('Grade: CGPA: 8.4/10')).toBeInTheDocument()
+  expect(
+    screen.getByRole('heading', { name: 'Extracurricular activities' }),
+  ).toBeInTheDocument()
+  expect(screen.getByText('Organized a football event.')).toBeInTheDocument()
 })

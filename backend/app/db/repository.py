@@ -82,9 +82,12 @@ class AnalysisRepository:
                                       .where(MatchResult.analysis_id == row.id).order_by(MatchResult.created_at.desc(), MatchResult.id.desc())
                                       .limit(match_limit).offset(match_offset)).all()
             total = session.scalar(select(func.count()).select_from(MatchResult).where(MatchResult.analysis_id == row.id))
-            return AnalysisDetail(id=row.id, stored=True, created_at=aware(row.created_at), expires_at=self._expiry(row),
+            result = AnalysisDetail(id=row.id, stored=True, created_at=aware(row.created_at), expires_at=self._expiry(row),
                 parsed=data.parsed, extraction=data.extraction, match_count=total, matches_limit=match_limit, matches_offset=match_offset,
                 matches=[StoredMatch(id=m.id, created_at=aware(m.created_at), job_description=text, result=m.result) for m, text in matches])
+            from app.services.readiness import ReadinessService
+            result.readiness = ReadinessService(self.settings.readiness_weights).evaluate(result.parsed, result.extraction)
+            return result
 
     def resume_for_match(self, ident):
         with self.database.sessions.begin() as session:

@@ -1,3 +1,5 @@
+> Current default: anonymous stateless processing, no login, no persistent history. See [anonymous design](anonymous-processing.md) and [current deployment guide](DEPLOYMENT.md). Owner-token and saved-history instructions below describe the retained legacy single_user backend, not the public frontend.
+
 # Phase 8: authorized reports and integrated workflow
 
 The frontend connects upload, extraction, skills, matching, history, deletion, and

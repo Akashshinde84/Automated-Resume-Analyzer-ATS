@@ -1,3 +1,5 @@
+> Current default: anonymous stateless processing, no login, no persistent history. See [anonymous design](anonymous-processing.md) and [current deployment guide](DEPLOYMENT.md). Owner-token and saved-history instructions below describe the retained legacy single_user backend, not the public frontend.
+
 # Frontend through Phase 8
 
 Resume Atlas is the React frontend for the Automated Resume Analyzer. All candidate

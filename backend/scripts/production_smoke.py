@@ -1,6 +1,6 @@
-"""Authorized stateless deployment checks using generated fictional resumes only.
+"""Anonymous stateless deployment checks using generated fictional resumes only.
 
-Set SMOKE_API_URL, SMOKE_FRONTEND_ORIGIN and SMOKE_API_KEY in the process environment.
+Set SMOKE_API_URL and SMOKE_FRONTEND_ORIGIN in the process environment.
 No credentials, resume text, report content or response bodies are printed/saved.
 """
 import argparse
@@ -24,17 +24,17 @@ def main():
         assert not url.username and not url.password and not url.query and not url.fragment
         assert url.path in ("", "/")
         assert url.scheme == "https" or (local and url.hostname in {"localhost", "127.0.0.1"})
-    headers = {"Authorization": "Bearer " + os.environ["SMOKE_API_KEY"]}
+    headers = {}
     with httpx.Client(base_url=base, timeout=90, follow_redirects=False) as client:
         assert client.get("/health").json() == {"status": "ok"}
-        assert client.get("/api/v1/analyses").status_code == 401
+        assert client.get("/api/v1/analyses").status_code == 403
         allowed = client.options("/api/v1/resumes/analyze", headers={"Origin": origin,
-            "Access-Control-Request-Method": "POST", "Access-Control-Request-Headers": "authorization,content-type"})
+            "Access-Control-Request-Method": "POST", "Access-Control-Request-Headers": "content-type"})
         assert allowed.headers.get("access-control-allow-origin") == origin
         denied = client.options("/api/v1/resumes/analyze", headers={"Origin": "https://untrusted.example.test",
             "Access-Control-Request-Method": "POST"})
         assert "access-control-allow-origin" not in denied.headers
-        assert client.get("/api/v1/analyses", headers=headers).status_code == 409
+        assert client.get("/api/v1/analyses", headers=headers).status_code == 403
         document = Document()
         for line in ["Name: Alex Example", "alex@example.test", "Skills", "Python, React, SQL",
                      "Experience", "Software Engineer at Example Labs", "2022 - Present", "Built Python APIs."]:
@@ -81,7 +81,7 @@ def main():
                                      ("wrong.exe", b"%PDF-", 415)]:
             assert client.post("/api/v1/resumes/analyze", headers=headers,
                 files={"file": (name, data, "application/octet-stream")}).status_code == expected
-    print("PASS: health, authorization, CORS, stateless storage, DOCX/PDF/scanned extraction, NER, matching, JSON/PDF reports and invalid uploads.")
+    print("PASS: health, private-history isolation, CORS, stateless storage, DOCX/PDF/scanned extraction, NER, matching, JSON/PDF reports and invalid uploads.")
     return 0
 
 

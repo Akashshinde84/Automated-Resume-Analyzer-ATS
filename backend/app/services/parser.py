@@ -8,12 +8,14 @@ from app.services.sections import ALIASES, HEADINGS, heading_section
 from app.services.skills import get_skill_extractor
 
 from docx import Document
-from docx.table import Table
-from docx.text.paragraph import Paragraph
-from pdfminer.high_level import extract_pages
-from pdfminer.layout import LTImage, LTTextContainer
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import PDFPageAggregator
+from pdfminer.layout import LAParams
+from pdfminer.layout import LTImage
 from pdfminer.pdfdocument import PDFDocument, PDFEncryptionError, PDFPasswordIncorrect
 from pdfminer.pdfparser import PDFParser
+from pdfminer.pdfpage import PDFPage
+from app.services.document_layout import pdf_lines, reading_order, pdf_annotations, associate_links, docx_blocks
 
 
 class ResumeParseError(ValueError):
@@ -68,20 +70,6 @@ def _has_image(item) -> bool:
     return any(_has_image(child) for child in item) if hasattr(item, "__iter__") else False
 
 
-def _blocks(container):
-    for block in container.iter_inner_content():
-        if isinstance(block, Paragraph):
-            yield block.text
-        elif isinstance(block, Table):
-            for row in block.rows:
-                seen = set()
-                for cell in row.cells:
-                    # Merged cells can occur more than once in a row.
-                    if cell._tc not in seen:
-                        seen.add(cell._tc)
-                        yield "\n".join(_blocks(cell))
-
-
 class ResumeParser:
     def __init__(self, max_size_bytes: int = 10 * 1024 * 1024,
                  max_docx_uncompressed_bytes: int = 50 * 1024 * 1024,
@@ -112,12 +100,26 @@ class ResumeParser:
                 raw, warnings, details = self._docx(path)
         except ResumeParseError:
             raise
+        except MemoryError:
+            raise
         except OSError as exc:
             raise ResumeParseError("unreadable_file", "The file could not be read.") from exc
         except Exception as exc:
             # Parser libraries raise many format-specific exceptions; never expose internals or paths.
             raise ResumeParseError("corrupt_file", "The document is corrupted or cannot be parsed.") from exc
         text = normalize_text(raw)
+        links = details.pop("hyperlinks", [])
+        blocks = details.pop("layout_blocks", [])
+        cursor = 0
+        for index, block in enumerate(blocks):
+            value = normalize_text(block["text"])
+            start = text.find(value, cursor) if value else -1
+            if start >= 0:
+                block["text"] = value
+                for link in links:
+                    if link.get("block_index") == index:
+                        link["text_start"] = start
+                cursor = start + len(value)
         sections, section_warnings = segment_sections(text)
         if not text:
             warnings.append("No extractable text was found. OCR is not implemented; no text has been inferred.")
@@ -125,6 +127,9 @@ class ResumeParser:
         skills = skill_extractor.extract(text)
         return {
             "text": text,
+            "raw_text": raw,
+            "hyperlinks": links,
+            "layout_blocks": blocks[:5000],
             "skills": [skill.model_dump(mode="json") for skill in skills],
             "skill_ontology_version": skill_extractor.ontology.version,
             "sections": sections,
@@ -134,32 +139,60 @@ class ResumeParser:
         }
 
     def _pdf(self, path: Path):
+        pages, links, blocks, layout_warnings = [], [], [], []
+        image_only, no_text, character_count = [], [], 0
         try:
             with path.open("rb") as source:
-                document = PDFDocument(PDFParser(source))
+                document = PDFDocument(PDFParser(source), caching=False)
                 if document.encryption:
                     raise ResumeParseError("encrypted_pdf", "Encrypted PDFs are not supported. Upload an unencrypted copy.")
-            pages = []
-            image_only = []
-            no_text = []
-            for number, page in enumerate(extract_pages(str(path)), start=1):
-                if number > self.max_pdf_pages:
-                    raise ResumeParseError("page_limit", "The PDF exceeds the configured page limit.", 413)
-                content = "\n".join(item.get_text() for item in page if isinstance(item, LTTextContainer))
-                pages.append(content)
-                if not normalize_text(content):
-                    no_text.append(number)
-                    if _has_image(page):
-                        image_only.append(number)
+                manager = PDFResourceManager(caching=False)
+                device = PDFPageAggregator(manager, laparams=LAParams())
+                interpreter = PDFPageInterpreter(manager, device)
+                try:
+                    for number, pdf_page in enumerate(PDFPage.create_pages(document), 1):
+                        if number > self.max_pdf_pages:
+                            raise ResumeParseError("page_limit", "The PDF exceeds the configured page limit.", 413)
+                        page_links = pdf_annotations(pdf_page, number)
+                        interpreter.process_page(pdf_page)
+                        page = device.get_result()
+                        lines, columns = reading_order(pdf_lines(page, number), page.width)
+                        if len(blocks) + len(lines) > 5000:
+                            raise ResumeParseError("layout_limit", "The document contains too many text blocks. Try a simpler resume.", 413)
+                        associate_links(page_links, lines)
+                        for link in page_links:
+                            x0, y0, x1, y1 = link["bbox"]
+                            matches = [i for i, block in enumerate(lines) if block["bbox"][0] < x1 and block["bbox"][2] > x0
+                                       and block["bbox"][1] < y1 and block["bbox"][3] > y0]
+                            if len(matches) == 1:
+                                link["block_index"] = len(blocks) + matches[0]
+                            elif len(matches) > 1:
+                                link["ambiguous"] = True
+                                layout_warnings.append("An embedded link overlaps multiple text blocks; its project association is unresolved.")
+                        links.extend(page_links[:max(0, 500 - len(links))])
+                        blocks.extend(lines)
+                        if columns:
+                            layout_warnings.append("Two-column reading order inferred from a page gutter; review the source layout.")
+                        content = "\n".join(block["text"] for block in lines)
+                        character_count += len(content)
+                        if character_count > 100_000:
+                            raise ResumeParseError("extracted_text_limit", "Extracted text exceeds the analysis limit.", 413)
+                        pages.append(content)
+                        if not content.strip():
+                            no_text.append(number)
+                            if _has_image(page):
+                                image_only.append(number)
+                finally:
+                    device.close()
         except (PDFPasswordIncorrect, PDFEncryptionError) as exc:
             raise ResumeParseError("encrypted_pdf", "Encrypted PDFs are not supported. Upload an unencrypted copy.") from exc
-        warnings = []
+        warnings = list(dict.fromkeys(layout_warnings))
         if image_only:
             warnings.append(f"Image-only pages detected: {image_only}. They may be scanned; OCR is required to read them.")
         other_blank = sorted(set(no_text) - set(image_only))
         if other_blank:
             warnings.append(f"Pages without extractable text: {other_blank}. They may be blank or contain outlined text.")
-        return "\n\n".join(pages), warnings, {"page_count": len(pages), "image_only_pages": image_only}
+        return "\n\n".join(pages), warnings, {"page_count": len(pages), "image_only_pages": image_only, "hyperlinks": links, "layout_blocks": blocks}
 
     def _docx(self, path: Path):
         with ZipFile(path) as archive:
@@ -175,16 +208,17 @@ class ResumeParser:
                 raise BadZipFile("Invalid ZIP checksum")
         document = Document(str(path))
         parts = []
+        links, blocks = [], []
         seen = set()
         for section in document.sections:
             for header in (section.header, section.first_page_header, section.even_page_header):
                 if header.part not in seen:
                     seen.add(header.part)
-                    parts.extend(_blocks(header))
-        parts.extend(_blocks(document))
+                    parts.extend(docx_blocks(header, links, blocks))
+        parts.extend(docx_blocks(document, links, blocks))
         for section in document.sections:
             for footer in (section.footer, section.first_page_footer, section.even_page_footer):
                 if footer.part not in seen:
                     seen.add(footer.part)
-                    parts.extend(_blocks(footer))
-        return "\n".join(parts), ["DOCX text boxes, drawings, and tracked revisions may not be extracted; page count is unavailable."], {"page_count": None}
+                    parts.extend(docx_blocks(footer, links, blocks))
+        return "\n".join(parts), ["DOCX text boxes, drawings, and tracked revisions may not be extracted; page count is unavailable."], {"page_count": None, "hyperlinks": links, "layout_blocks": blocks}

@@ -8,8 +8,7 @@ export function Job() {
     navigate = useNavigate(),
     active = useRef(null)
   const [busy, setBusy] = useState(false),
-    [error, setError] = useState(null),
-    [store, setStore] = useState(false)
+    [error, setError] = useState(null)
   useEffect(() => () => active.current?.abort(), [])
   if (!workspace.analysis?.parsed.text.trim())
     return (
@@ -27,25 +26,19 @@ export function Job() {
     )
   async function submit(event) {
     event.preventDefault()
-    if (!workspace.token) {
-      workspace.setSessionOpen(true)
-      return
-    }
     setBusy(true)
     setError(null)
     const control = workspace.controller()
     active.current = control
     try {
       const analysis = workspace.analysis
-      const result = await request('/api/v1/jobs/match', workspace.token, {
+      const result = await request('/api/v1/jobs/match', {
         method: 'POST',
         signal: control.signal,
         body: {
-          ...(analysis.id
-            ? { analysis_id: analysis.id }
-            : { resume: { text: analysis.parsed.text } }),
+          resume: { text: analysis.parsed.text },
           job_description: workspace.job,
-          store: store && analysis.stored && workspace.historyAvailable,
+          store: false,
         },
       })
       if (!control.signal.aborted) {
@@ -73,12 +66,6 @@ export function Job() {
             <span className="badge">Plain text</span>
           </div>
           <ErrorNotice error={error} />
-          {error?.status === 0 && store && (
-            <p className="notice warning">
-              The request may have completed on the server. Check saved
-              comparisons before retrying to avoid a duplicate.
-            </p>
-          )}
           <label htmlFor="job-description">
             Role, responsibilities, and qualifications
           </label>
@@ -99,22 +86,6 @@ export function Job() {
             </small>
             <span>{workspace.job.length.toLocaleString()} / 50,000</span>
           </div>
-          {workspace.analysis.stored && workspace.historyAvailable && (
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={store}
-                disabled={busy}
-                onChange={(event) => setStore(event.target.checked)}
-              />
-              <span>
-                Save this comparison with my analysis
-                <small>
-                  The pasted job description and match result will be stored.
-                </small>
-              </span>
-            </label>
-          )}
           <div className="form-footer">
             <Link to="/analysis" className="button text-button">
               Back to analysis

@@ -1,4 +1,4 @@
-# First deployment: authenticated, single-owner, stateless. No database provisioned.
+# Anonymous stateless deployment. No database or login credentials provisioned.
 services:
   - type: web
     name: resume-analyzer-api
@@ -12,9 +12,7 @@ services:
       - key: DEPLOYMENT_ENVIRONMENT
         value: production
       - key: APP_MODE
-        value: single_user
-      - key: SINGLE_USER_API_KEY
-        generateValue: true
+        value: anonymous
       - key: REPORT_SIGNING_KEY
         generateValue: true
       - key: CORS_ORIGINS
@@ -39,3 +37,7 @@ services:
         value: "10485760"
       - key: MAX_PDF_PAGES
         value: "50"
+      - key: ANONYMOUS_REQUESTS_PER_MINUTE
+        value: "30"
+      - key: ANONYMOUS_GLOBAL_REQUESTS_PER_MINUTE
+        value: "120"
